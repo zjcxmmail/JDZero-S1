@@ -4,13 +4,13 @@ import time
 import json
 
 '''
-1、抓包，登录 https://bean.m.jd.com 点击签到并且出现签到日历后；
-2、返回抓包，搜索关键词 functionId=signBean 复制Cookie中的pt_key与pt_pin填入以下两个空白处；
-3、注意，cookies会过期；
-4、python3 环境，需要requests包；
-5、自动运行 cron 5 6-23 * * * python plantBean.py
-6、每周一10:00开始，可以*手动*领取上一轮的奖励；约为88个京豆
-
+1、抓包，登录 https://bean.m.jd.com 点击签到并且出现签到日历后
+2、返回抓包，搜索关键词 functionId=signBean 复制Cookie中的pt_key与pt_pin填入以下两个空白处
+3、注意，cookies会过期,大约为一个月
+4、python3 环境，需要requests包
+5、自动运行 cron 5 6-23 * * * python JD_plantBean.py
+[x]6、每周一10:00开始，可以*手动*领取上一轮的奖励；约为88个京豆
+6、添加 周一自动兑换京豆
 '''
 cookies1 = {
     'pt_key': '',    # 类似  "AAJeidSDSFg8osfddsVIMLfefwnlTWRjTW58M3sO9DHASBBKltQ"
@@ -53,6 +53,9 @@ def plantBeanIndex(cookies):
     code = result["code"]
     data = result["data"]
     roundList = data["roundList"][1]  # 本回合
+    awardState = data["roundList"][0]["awardState"]   # 5 可以收
+    if awardState == '5':
+        receive(cookies, data["roundList"][0]['roundId']) # 周一兑换京豆
 
     growth = roundList['growth']  # 当前成长值
     nutrients = roundList['nutrients']  # 当前营养液
@@ -69,7 +72,22 @@ def _jsonp2dict(jsonp):
     _dict = re.findall(r"jsonp\w+\((.*)\)", jsonp)[0]
     return json.loads(_dict)
 
-
+def receive(cookie, roundId):
+    params = (
+        ('functionId', 'receivedBean'),
+        ('body', f"""{{"roundId":"{roundId}","monitor_source":"plant_m_plant_index","monitor_refer":"plant_index","version":"8.4.0.0"}}"""),
+        ('appid', 'ld'),
+        ('client', 'apple'),
+        ('clientVersion', '8.5.10'),
+        ('networkType', 'wifi'),
+        ('osVersion', '13.4.1'),
+        ('uuid', '9b812b59e055cd226fd60ebb5fd0981c4d0d235d'),
+        ('jsonp', 'jsonp_1588557832190_37229'),
+    )
+    response = requests.get('https://api.m.jd.com/client.action',
+                            headers=headers, params=params, cookies=cookies)
+    print(response.text)
+    
 def waterwheel(timeNutrientsRes, roundId, cookies):
     """
     水车 换取营养液 游戏

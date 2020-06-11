@@ -7,7 +7,7 @@ import json
 1、抓包，登录 https://bean.m.jd.com 点击签到并且出现签到日历后
 2、返回抓包，搜索关键词 functionId=signBean 复制Cookie中的pt_key与pt_pin填入以下两个空白处
 3、注意，cookies会过期,大约为一个月
-4、python3 环境，需要requests包
+4、python3.6+ 环境，需要requests包
 5、自动运行 cron 5 6-23 * * * python JD_plantBean.py
 [x]6、每周一10:00开始，可以*手动*领取上一轮的奖励；约为88个京豆
 6、添加 周一自动兑换京豆

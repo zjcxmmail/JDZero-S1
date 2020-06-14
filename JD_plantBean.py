@@ -321,7 +321,9 @@ def _plantChannelTaskList(cookies):
     )
     response = requests.get('https://api.m.jd.com/client.action',
                             headers=headers, params=params, cookies=cookies)
-    result = json(response.text)
+    # print(response.text)
+    result = json.loads(response.text)
+    # print("ok")
 
     data = result["data"]
     channelList = data["goodChannelList"] + data["normalChannelList"]
@@ -338,7 +340,9 @@ def _plantChannelTaskList(cookies):
         )
         response = requests.get('https://api.m.jd.com/client.action',
                                 headers=headers, params=params, cookies=cookies)
-        result = json(response.text)
+        
+        result = json.loads(response.text)
+
         nutrNum = result["data"]["nutrNum"]
         limit -= nutrNum
         print(result)
@@ -426,3 +430,4 @@ for cookies in cookiesList:
         print("跳过浇水")
     print("*"*8+"检查完毕"+"*"*8)
     print("\n")
+

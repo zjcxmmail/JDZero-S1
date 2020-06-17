@@ -2,7 +2,7 @@ import requests
 import re
 import json
 import time
-# import jdCookie
+import jdCookie
 
 """
 参考 JD_plantBean.py
@@ -10,12 +10,9 @@ import time
 2、每天4个京豆，聊胜于无
 """
 
-cookies1 = {
-    'pt_key': '',    # 类似  "AAJeidSDSFg8osfddsVIMLfefwnlTWRjTW58M3sO9DHASBBKltQ"
-    'pt_pin': '',    # 类似  "jd_3f45d54g45g4"
-}
 
-cookiesList = [cookies1]  # 多账号准备
+
+cookiesList =jdCookie.get_cookies()  # 多账号准备
 
 headers = {
     'Host': 'api.m.jd.com',

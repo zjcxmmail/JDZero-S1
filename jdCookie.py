@@ -52,7 +52,7 @@ def isNot_valid(cookies):
     return f
 
 def get_cookies():
-    i= [i for i in [cookies1, cookies2, cookies3] if not isNot_valid(i)]
+    i= [i for i in cookieLists if not isNot_valid(i)]
     return i
     
 print("***"*20)

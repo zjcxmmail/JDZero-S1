@@ -18,7 +18,7 @@ cookies1={
 'pt_pin': '',
 }
 
-cookies2={}
+cookies2={}   # 如果有其它账号，还需要将cookies2填写进 下面的cookieLists
 
 cookieLists=[cookies1,]  #多账号准备
 

@@ -353,7 +353,7 @@ def threeMealReward(cookies):
     print(response.text)
 
 
-for cookies in jdCookie.get_cookies()[::2]:
+for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
     initPetTown(cookies)
 

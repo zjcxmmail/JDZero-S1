@@ -332,6 +332,7 @@ for cookies in jdCookie.get_cookies():
     initFarm(cookies)
     for i in shareCode:
         masterHelp(cookies, i)
+        masterHelp(cookies, f"""{i}-3""")  #临时
     initForTask(cookies)
     # TurntableFarm(cookies)
     water(cookies)

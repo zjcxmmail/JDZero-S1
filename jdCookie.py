@@ -31,7 +31,6 @@ def isNot_valid(cookies):
         'Connection': 'keep-alive',
         'User-Agent': 'jdapp;iPhone;8.5.5;13.4;9b812b59e055cd226fd60ebb5fd0981c4d0d235d;network/wifi;supportApplePay/3;hasUPPay/0;pushNoticeIsOpen/0;model/iPhone9,2;addressid/138109592;hasOCPay/0;appBuild/167121;supportBestPay/0;jdSupportDarkMode/0;pv/103.2;apprpd/MyJD_Main;ref/https%3A%2F%2Fbean.m.jd.com%2FplantBean%2Findex.action%3Fsource%3Dwojing%26un_area%3D5_274_49707_49973%26lng%3D116.8438383685941%26lat%3D39.95744163210918;psq/3;ads/;psn/9b812b59e055cd226fd60ebb5fd0981c4d0d235d|219;jdv/0|direct|-|none|-|1583449735697|1583796810;adk/;app_device/IOS;pap/JA2015_311210|8.5.5|IOS 13.4;Mozilla/5.0 (iPhone; CPU iPhone OS 13_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
         'Accept-Language': 'zh-cn',
-        574404828904',
         'Accept-Encoding': 'gzip, deflate, br',
     }
     params = (

@@ -7,6 +7,7 @@
 - 天天加速 JD_speed.py
 - 东东农场 JD_dongdongFarm.py
 - 东东萌宠 JD_dongdongPet.py
+- 宠汪汪   JD_chongWangWang.py
 
 
 ![种豆得豆](jd_plantBean.jpg)

@@ -211,7 +211,7 @@ def getPetTaskConfig(cookies):
 
     def isTrue(_list):
         if _list["joinedCount"] == None:
-            print("error")
+            #print("error")
             # print(_list)
             return True
         else:

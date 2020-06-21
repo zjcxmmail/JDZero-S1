@@ -4,6 +4,7 @@ import requests
 import time
 
 """
+东东农场
 1、从jdCookie.py处填写 cookie
 2、shareCode 为自己的助力码，但是需要别人为自己助力
 3、欢迎留下shareCode互助
@@ -332,7 +333,7 @@ for cookies in jdCookie.get_cookies():
     initFarm(cookies)
     for i in shareCode:
         masterHelp(cookies, i)
-        masterHelp(cookies, f"""{i}-3""")  #临时
+        # masterHelp(cookies, f"""{i}-3""")  #临时
     initForTask(cookies)
     # TurntableFarm(cookies)
     water(cookies)

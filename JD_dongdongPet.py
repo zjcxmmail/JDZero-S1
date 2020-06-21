@@ -4,7 +4,7 @@ import requests
 import time
 
 """
-东东农场
+东东萌宠
 1、从jdCookie.py处填写 cookie
 2、shareCode 为自己的助力码，但是需要别人为自己助力
 3、欢迎留下shareCode互助
@@ -13,6 +13,7 @@ import time
 shareCodes = [
     "MTAxODc2NTEzMTAwMDAwMDAwOTYwNDkzMQ==", 
     "MTAxODcxOTI2NTAwMDAwMDAwMTY0NTc4OQ==",
+    "MTAxODc2NTEzMDAwMDAwMDAyNjYzMDQ3MQ==",
 ]  # 自己不能助力自己,填写他人的助力码
 
 
@@ -39,7 +40,7 @@ def initPetTown(cookies):
 
     data = result["result"]
     # print(data)
-    petPlaceInfoList = data["petPlaceInfoList"]
+    # petPlaceInfoList = data["petPlaceInfoList"]
     petSportStatus = data["petSportStatus"]
     _shareCode = data["shareCode"]
 
@@ -51,8 +52,6 @@ def initPetTown(cookies):
 
 
 def update_info(cookies):
-    print("\n【爱心位置】")
-    # print("有爱心，收集爱心；\n返回饲料数量")
     headers = {
         'User-Agent': 'JD4iPhone/167237 (iPhone; iOS 13.5.1; Scale/3.00)',
         'Host': 'api.m.jd.com',
@@ -76,10 +75,7 @@ def update_info(cookies):
 
     j = 0
     for i in petPlaceInfoList:
-        print(f"""  {i["place"]} -> {i["energy"]}""")
         if i["energy"] > 0:
-
-            print("         >>>> energyCollect")
             energyCollect(cookies, i["place"])
         j += 1
 
@@ -107,59 +103,55 @@ def sport(cookies):
     response = requests.post('https://api.m.jd.com/client.action',
                              headers=headers, params=params, cookies=cookies, data=data)
     result = json.loads(response.text)
-
-    # print(result)
     if result["resultCode"] == "3001":
         print(">>>运动次数上限")
         return
+    for i in range(10):
+        headers = {
+            'User-Agent': 'jdapp;iPhone;9.0.0;13.5.1;9b812b59e055cd226fd60ebb5fd0981c4d0d235d;network/wifi;supportApplePay/3;hasUPPay/0;pushNoticeIsOpen/0;model/iPhone9,2;addressid/138109592;hasOCPay/0;appBuild/167237;supportBestPay/0;jdSupportDarkMode/0;pv/443.87;apprpd/DongdongFarmMain;ref/JDFarmHomeViewController;psq/0;ads/;psn/9b812b59e055cd226fd60ebb5fd0981c4d0d235d|1851;jdv/0|kong|t_2009624187_|tuiguang|efb0dd46e275438e8ab51051ff404872|1590504165577|1590504173;adk/;app_device/IOS;pap/JA2015_311210|9.0.0|IOS 13.5.1',
+            'Host': 'api.m.jd.com',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
 
-    headers = {
-        'User-Agent': 'jdapp;iPhone;9.0.0;13.5.1;9b812b59e055cd226fd60ebb5fd0981c4d0d235d;network/wifi;supportApplePay/3;hasUPPay/0;pushNoticeIsOpen/0;model/iPhone9,2;addressid/138109592;hasOCPay/0;appBuild/167237;supportBestPay/0;jdSupportDarkMode/0;pv/443.87;apprpd/DongdongFarmMain;ref/JDFarmHomeViewController;psq/0;ads/;psn/9b812b59e055cd226fd60ebb5fd0981c4d0d235d|1851;jdv/0|kong|t_2009624187_|tuiguang|efb0dd46e275438e8ab51051ff404872|1590504165577|1590504173;adk/;app_device/IOS;pap/JA2015_311210|9.0.0|IOS 13.5.1',
-        'Host': 'api.m.jd.com',
-        'Content-Type': 'application/x-www-form-urlencoded',
-    }
+        params = (
+            ('functionId', 'getSportReward'),
+        )
 
-    params = (
-        ('functionId', 'getSportReward'),
-    )
+        data = {
 
-    data = {
+            'body': '{}',
+            'appid': "wh5"
+        }
 
-        'body': '{}',
-        'appid': "wh5"
-    }
-
-    response = requests.post('https://api.m.jd.com/client.action',
-                             headers=headers, params=params, cookies=cookies, data=data)
-    print("getSportReward  ", response.text)
+        response = requests.post('https://api.m.jd.com/client.action',
+                                 headers=headers, params=params, cookies=cookies, data=data)
+    # print("getSportReward  ", response.text)
 
 
-def feedPets(cookies, hasFeedTimes, foodAmount):
+def feedPets(cookies, foodAmount):
     print("\n【feedPets】")
     if foodAmount < 10:
         print(" [X]跳过feed, food不足:", foodAmount)
         return
-    if hasFeedTimes > 10:
-        print(" [X]跳过feed, feed次数足够:", hasFeedTimes)
-        return
-    headers = {
-        'User-Agent': 'JD4iPhone/167237 (iPhone; iOS 13.5.1; Scale/3.00)',
-        'Host': 'api.m.jd.com',
-        'Content-Type': 'application/x-www-form-urlencoded',
-    }
+    for _ in range(int(foodAmount/10)):
+        headers = {
+            'User-Agent': 'JD4iPhone/167237 (iPhone; iOS 13.5.1; Scale/3.00)',
+            'Host': 'api.m.jd.com',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
 
-    params = (
-        ('functionId', 'feedPets'),
-    )
+        params = (
+            ('functionId', 'feedPets'),
+        )
 
-    data = {
-        'body': '{}',
-        'appid': "wh5"
-    }
+        data = {
+            'body': '{}',
+            'appid': "wh5"
+        }
 
-    response = requests.post('https://api.m.jd.com/client.action',
-                             headers=headers, params=params, cookies=cookies, data=data)
-    print(response.text)
+        response = requests.post('https://api.m.jd.com/client.action',
+                                 headers=headers, params=params, cookies=cookies, data=data)
+        time.sleep(1)
 
 
 def energyCollect(cookies, place):
@@ -177,10 +169,8 @@ def energyCollect(cookies, place):
         'body': f"""{{"place":{place}}}""",
         'appid': "wh5"
     }
-
     response = requests.post('https://api.m.jd.com/client.action',
                              headers=headers, params=params, cookies=cookies, data=data)
-    print("collectEnergy: ", response.text)
 
 
 def initTask(cookies):
@@ -203,47 +193,34 @@ def initTask(cookies):
     response = requests.post('https://api.m.jd.com/client.action',
                              headers=headers, params=params, cookies=cookies, data=data)
     result = json.loads(response.text)
-
-    # print("==taskList==")
     data = result["result"]
-
     _signInit = data["signInit"]  # 每日签到
     print(f"""[dailySign]: {_signInit["finished"]}""")
     if not _signInit["finished"]:
         getSignReward(cookies)
 
     _threeMealInit = data["threeMealInit"]  # 三餐
-    # print(_threeMealInit)
     print(
         f"""[threeMeal]: {_threeMealInit["finished"]}""")
     if _threeMealInit["timeRange"] != -1 and _threeMealInit["finished"] == False:  # 时间 、未完成
         print(f"""执行threeMeal{_threeMealInit["timeRange"]}""")
         threeMealReward(cookies)
-
     _browseSingleShopInit = data["browseSingleShopInit"]  # 浏览单个店铺
     print(f"""[browse_1_Shop]: {_browseSingleShopInit["finished"]}""")
-
     if not _browseSingleShopInit["finished"]:
         getSingleShopReward(cookies)
-
     _browseShopsInit = data["browseShopsInit"]  # 浏览店铺 多次
-    # print(_browseShopsInit)
     print(f"""[browse_more_Shops]: {_browseShopsInit["finished"]}""")
     if not _browseShopsInit["finished"]:
-        # print("_browseShopsInit")
+
         getBrowseShopsReward(cookies)
 
     _firstFeedInit = data["firstFeedInit"]  # 每日首次投喂
     print(f"""[feed_1]: {_firstFeedInit["finished"]}""")
-    print("////////todo")
-    if _firstFeedInit["finished"] == False:
-        pass
 
     _feedReachInit = data["feedReachInit"]  # 每日10次
-    print(_feedReachInit)
     print(
-        f"""[feed_10]: {_feedReachInit["finished"]}      feedTimes:{int(_feedReachInit["hadFeedAmount"]/10)}""")
-    print("////////todo")
+        f"""[feed_10]: {_feedReachInit["finished"]}      feedTimes:({int(_feedReachInit["hadFeedAmount"]/10)}/10)""")
     return {"hadFeedAmount": int(_feedReachInit["hadFeedAmount"]/10), }
 
 
@@ -265,7 +242,6 @@ def getSignReward(cookies):
 
     response = requests.post('https://api.m.jd.com/client.action',
                              headers=headers, params=params, cookies=cookies, data=data)
-    print(response.text)
 
 
 def getBrowseShopsReward(cookies):
@@ -287,7 +263,7 @@ def getBrowseShopsReward(cookies):
 
     response = requests.post('https://api.m.jd.com/client.action',
                              headers=headers, params=params, cookies=cookies, data=data)
-    print(response.text)
+    # print(response.text)
 
 
 def getSingleShopReward(cookies):
@@ -310,8 +286,6 @@ def getSingleShopReward(cookies):
     response = requests.post('https://api.m.jd.com/client.action',
                              headers=headers, params=params, cookies=cookies, data=data)
 
-    print(response.text)
-
 
 def _help(cookies, shareCode):
     headers = {
@@ -328,7 +302,6 @@ def _help(cookies, shareCode):
     }
     response = requests.post('https://api.m.jd.com/client.action',
                              headers=headers, params=params, cookies=cookies, data=data)
-    # print(response.text)
 
 
 def threeMealReward(cookies):
@@ -350,23 +323,20 @@ def threeMealReward(cookies):
 
     response = requests.post('https://api.m.jd.com/client.action',
                              headers=headers, params=params, cookies=cookies, data=data)
-    print(response.text)
+    # print(response.text)
 
 
 for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
     initPetTown(cookies)
-
     for i in shareCodes:
         _help(cookies, i)
-
-    hadFeedAmount = initTask(cookies)["hadFeedAmount"]
-
+    initTask(cookies)
     sport(cookies)
-    foodAmount = update_info(cookies)  # 先取❤,返回feed次数
-    feedPets(cookies, hadFeedAmount, foodAmount)  # 仅有的feed
-    foodAmount = update_info(cookies) 
-    feedPets(cookies, hadFeedAmount, foodAmount)  
+    foodAmount = update_info(cookies)
+    feedPets(cookies, foodAmount)
+    update_info(cookies)
     print("\n")
     print("##"*20)
     # exit()
+

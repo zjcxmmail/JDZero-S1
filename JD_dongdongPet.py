@@ -209,11 +209,11 @@ def initTask(cookies):
     print(f"""[browse_1_Shop]: {_browseSingleShopInit["finished"]}""")
     if not _browseSingleShopInit["finished"]:
         getSingleShopReward(cookies)
-    _browseShopsInit = data["browseShopsInit"]  # 浏览店铺 多次
-    print(f"""[browse_more_Shops]: {_browseShopsInit["finished"]}""")
-    if not _browseShopsInit["finished"]:
+    #_browseShopsInit = data["browseShopsInit"]  # 浏览店铺 多次
+    #print(f"""[browse_more_Shops]: {_browseShopsInit["finished"]}""")
+    #if not _browseShopsInit["finished"]:
 
-        getBrowseShopsReward(cookies)
+        #getBrowseShopsReward(cookies)
 
     _firstFeedInit = data["firstFeedInit"]  # 每日首次投喂
     print(f"""[feed_1]: {_firstFeedInit["finished"]}""")

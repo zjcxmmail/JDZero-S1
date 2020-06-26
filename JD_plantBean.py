@@ -1,428 +1,222 @@
 import requests
-import re
 import time
 import json
 import jdCookie
 
-'''
-1、需要jdCookie.py
-2、自动运行 cron 5 6-23 * * * python JD_plantBean.py
-[x]6、每周一10:00开始，可以*手动*领取上一轮的奖励；约为88个京豆
-3、添加 周一自动兑换京豆
-'''
+"""
+1、从jdCookie.py处填写 cookie
+2、shareCode 为自己的助力码，但是需要别人为自己助力
+3、欢迎留下plantUuid互助
+"""
+
+plantUuid = ["7pt22jcko7ljrbpeask7r6avre3h7wlwy7o5jii",
+             "r7zdf2yfo4phlpel3nu4q63reu",
+             "e7lhibzb3zek2ssdsoyhpgn26va7nkkzj6ygely"]  # 填写别人的助力码
 
 
-cookiesList = jdCookie.get_cookies()  # 多账号准备,从 jdCookie.py 进入
-
-headers = {
-    'Host': 'api.m.jd.com',
-    'Accept': '*/*',
-    'Connection': 'keep-alive',
-    'User-Agent': 'jdapp;iPhone;8.5.5;13.4;adk/;app_device/IOS;pap/JA2015_311210|8.5.5|IOS 13.4;Mozilla/5.0 (iPhone; CPU iPhone OS 13_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
-    'Accept-Language': 'zh-cn',
-    'Referer': 'https://bean.m.jd.com/plantBean/index.action?source=wojing',
-    'Accept-Encoding': 'gzip, deflate, br',
-}
-
-
-def plantBeanIndex(cookies):
-    """
-    种豆得豆首页
-    """
-    params = (
-        ('functionId', 'plantBeanIndex'),
-        ('body', '{"plantUuid":"7pt22jcko7ljrbpeask7r6avre3h7wlwy7o5jii","monitor_refer":"","wxHeadImgUrl":"","shareUuid":"","followType":"1","monitor_source":"plant_m_plant_index","version":"8.4.0.0"}'),
-        ('appid', 'ld'),
-        ('client', 'apple'),
-        ('clientVersion', '8.5.5'),
-        ('networkType', 'wifi'),
-        ('osVersion', '13.4'),
-        ('jsonp', 'jsonp_1585181731771_80279'),
-    )
-    response = requests.get('https://api.m.jd.com/client.action',
-                            headers=headers, params=params, cookies=cookies)
-    result = _jsonp2dict(response.text)
-    if "data" not in result:
-        print("cookie 可能已经过期")
-    name = result['data']['plantUserInfo']['plantNickName']
-    code = result["code"]
-    data = result["data"]
-    roundList = data["roundList"][1]  # 本回合
-    awardState = data["roundList"][0]["awardState"]   # 5 可以收
-    if awardState == '5':
-        receive(cookies, data["roundList"][0]['roundId']) # 周一兑换京豆
-
-    growth = roundList['growth']  # 当前成长值
-    nutrients = roundList['nutrients']  # 当前营养液
-    roundId = roundList['roundId']  # 当前id
-    timeNutrientsRes = data["timeNutrientsRes"]  # 水车换营养液
-    awardList = data["awardList"]  # 每日任务列表
-    accessFlag = data["accessFlag"]  # 未知
-    roundAccessFag = data['roundAccessFag']  # 未知
-    timeNutrsCalenFlag = data["timeNutrsCalenFlag"]  # 未知
-    return roundId, name, (growth, nutrients), timeNutrientsRes, awardList, (accessFlag, roundAccessFag, timeNutrsCalenFlag)
-
-
-def _jsonp2dict(jsonp):
-    _dict = re.findall(r"jsonp\w+\((.*)\)", jsonp)[0]
-    return json.loads(_dict)
-
-def receive(cookie, roundId):
-    params = (
-        ('functionId', 'receivedBean'),
-        ('body', f"""{{"roundId":"{roundId}","monitor_source":"plant_m_plant_index","monitor_refer":"plant_index","version":"8.4.0.0"}}"""),
-        ('appid', 'ld'),
-        ('client', 'apple'),
-        ('clientVersion', '8.5.10'),
-        ('networkType', 'wifi'),
-        ('osVersion', '13.4.1'),
-        ('uuid', '9b812b59e055cd226fd60ebb5fd0981c4d0d235d'),
-        ('jsonp', 'jsonp_1588557832190_37229'),
-    )
-    response = requests.get('https://api.m.jd.com/client.action',
-                            headers=headers, params=params, cookies=cookies)
-    print(response.text)
-    
-def waterwheel(timeNutrientsRes, roundId, cookies):
-    """
-    水车 换取营养液 游戏
-    6:00-21:00每小时生产一瓶，超过三个小时自动停止
-    领取后方可继续生产
-    """
-    t = timeNutrientsRes
-    try:
-        nutrCount = t["nutrCount"]  # 如果不为0，就领取
-        print(f"目前水车上的营养液数:{nutrCount}")
-        if nutrCount != '0':
-            print("收取营养液ing")
-            _get_nutrient_from_waterwheel(cookies, roundId)
-    except:
-        print("暂时不能领取")
-
-
-def _awardList(awardList):
-    """
-    每天任务列表
-    """
-    daily_signin1 = awardList[0]["limitFlag"]
-    shop_2_1 = awardList[1]["childAwardList"][0]["limitFlag"]
-    product_2_2 = awardList[1]["childAwardList"][1]["limitFlag"]
-    channel_2_3 = awardList[1]["childAwardList"][2]["limitFlag"]
-    mall_4 = awardList[3]["limitFlag"]
-    double_5_1 = awardList[4]["childAwardList"][0]["limitFlag"]
-    return (daily_signin1, shop_2_1, product_2_2, channel_2_3, mall_4, double_5_1)
-
-
-def use_nutrient(cookies, roundId):
-    """
-    使用营养液换取成长值
-    """
-    params = (
-        ('functionId', 'cultureBean'),
-        ('body', f"""{{"roundId":"{roundId}","monitor_source":"plant_m_plant_index","monitor_refer":"plant_index","version":"8.4.0.0"}}"""),
-        ('appid', 'ld'),
-        ('client', 'apple'),
-        ('clientVersion', '8.5.6'),
-        ('networkType', 'wifi'),
-        ('osVersion', '13.4'),
-        ('jsonp', 'jsonp_1585191072780_34553'),
-    )
-    response = requests.get('https://api.m.jd.com/client.action',
-                            headers=headers, params=params, cookies=cookies)
-    result = _jsonp2dict(response.text)
-    print("浇水ing")
-
-    print(result)
-
-
-def _get_nutrient_from_waterwheel(cookies, roundId):
-    """
-    从水车领取营养液
-    """
+def functionTemplate(cookies, functionId, body):
     headers = {
         'Host': 'api.m.jd.com',
         'Accept': '*/*',
         'Connection': 'keep-alive',
-        'User-Agent': 'jdapp;iPhone;8.5.6;13.4;9b812b59e055cd226fd60ebb5fd0981c4d0d235d;network/wifi;supportApplePay/3;hasUPPay/0;pushNoticeIsOpen/0;model/iPhone9,2;addressid/138109592;hasOCPay/0;appBuild/167151;supportBestPay/0;jdSupportDarkMode/0;pv/117.5;apprpd/MyJD_Main;ref/https%3A%2F%2Fbean.m.jd.com%2FplantBean%2Findex.action%3Fsource%3Dwojing%26lng%3D116.845191%26lat%3D39.957801%26sid%3Dea687233c5e7d226b30940ed7382c5cw%26un_area%3D5_274_49707_49973;psq/0;ads/;psn/9b812b59e055cd226fd60ebb5fd0981c4d0d235d|334;jdv/0|androidapp|t_335139774|appshare|Wxfriends|1585284828744|1585284833;adk/;app_device/IOS;pap/JA2015_311210|8.5.6|IOS 13.4;Mozilla/5.0 (iPhone; CPU iPhone OS 13_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
-        'Accept-Language': 'zh-cn',
-        'Referer': 'https://bean.m.jd.com/plantBean/index.action?source=wojing',
+        'User-Agent': 'JD4iPhone/167249 (iPhone;iOS 13.5.1;Scale/3.00)',
+        'Accept-Language': 'zh-Hans-CN;q=1,en-CN;q=0.9',
         'Accept-Encoding': 'gzip, deflate, br',
+        'Content-Type': "application/x-www-form-urlencoded"
     }
+    if "version" not in body:
+        body["version"] = "9.0.0.1"
+    body["monitor_source"] = "plant_app_plant_index"
     params = (
-        ('functionId', 'receiveNutrients'),
-        ('body', f"""{{"roundId":"{roundId}","monitor_source":"plant_m_plant_index","monitor_refer":"plant_receiveNutrients","version":"8.4.0.0"}}"""),
+        ('functionId', functionId),
+        ('body', json.dumps(body)),
         ('appid', 'ld'),
-        ('client', 'apple'),
-        ('clientVersion', '8.5.6'),
-        ('networkType', 'wifi'),
-        ('osVersion', '13.4'),
-        ('jsonp', 'jsonp_1585192356255_16292'),
     )
     response = requests.get('https://api.m.jd.com/client.action',
                             headers=headers, params=params, cookies=cookies)
-    result = _jsonp2dict(response.text)
-    print(result)
+    return json.loads(response.text)
 
 
-def _productTaskList(cookies):
-    """
-    关注任务-浏览商品
-    limit=6
-    """  # limit=6
-    params = (
-        ('functionId', 'productTaskList'),
-        ('body', '{"monitor_source":"plant_m_plant_index","monitor_refer":"plant_productTaskList","version":"8.4.0.0"}'),
-        ('appid', 'ld'),
-        ('client', 'apple'),
-        ('clientVersion', '8.5.5'),
-        ('networkType', 'wifi'),
-        ('osVersion', '13.4'),
-        ('jsonp', 'jsonp_1585199203575_48826'),
-    )
-    headers = {
-        'Host': 'api.m.jd.com',
-        'Accept': '*/*',
-        'Connection': 'keep-alive',
-        'User-Agent': 'jdapp;iPhone;8.5.5;13.4;9b812b59e055cd226fd60ebb5fd0981c4d0d235d;network/wifi;supportApplePay/3;hasUPPay/0;pushNoticeIsOpen/0;model/iPhone9,2;addressid/138109592;hasOCPay/0;appBuild/167121;supportBestPay/0;jdSupportDarkMode/0;pv/103.2;apprpd/MyJD_Main;ref/https%3A%2F%2Fbean.m.jd.com%2FplantBean%2Findex.action%3Fsource%3Dwojing%26un_area%3D5_274_49707_49973%26lng%3D116.8438383685941%26lat%3D39.95744163210918;psq/3;ads/;psn/9b812b59e055cd226fd60ebb5fd0981c4d0d235d|219;jdv/0|direct|-|none|-|1583449735697|1583796810;adk/;app_device/IOS;pap/JA2015_311210|8.5.5|IOS 13.4;Mozilla/5.0 (iPhone; CPU iPhone OS 13_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
-        'Accept-Language': 'zh-cn',
-        'Referer': 'https://bean.m.jd.com/plantBean/index.action?source=wojing',
-        'Accept-Encoding': 'gzip, deflate, br',
-    }
-    response = requests.get('https://api.m.jd.com/client.action',
-                            headers=headers, params=params, cookies=cookies)
-    result = _jsonp2dict(response.text)
-    productInfoList = result["data"]["productInfoList"]
-    lists = sum(productInfoList, [])
-    lists = list(filter(lambda i: i["taskState"] == "2", lists))
-    limit = 6
+def takeTask(cookies, taskList):
+    # for i in taskList:
+    #     print(i,"\n")
+    time.sleep(2)
+    taskResult = functionTemplate(cookies, "receiveNutrientsTask", {
+        "monitor_refer": "receiveNutrientsTask", "awardType": "7"})  # 金融双签 额外
+    # print(taskResult)
+    time.sleep(2)
+    taskResult = functionTemplate(cookies, "receiveNutrientsTask", {
+        "monitor_refer": "plant_receiveNutrientsTask", "awardType": "4"})  # 逛逛会场
+    # print(taskResult)
+    for i in taskList:
 
-    for i in lists:
-        time.sleep(0.4)
-        productTaskId = i['productTaskId']
-        skuId = i["skuId"]
-        taskState = i["taskState"]
-        body = f"""{{"productTaskId":"{productTaskId}","skuId":"{skuId}","monitor_source":"plant_m_plant_index","monitor_refer":"plant_productNutrientsTask","version":"8.4.0.0"}}"""
-        params = (
-            ('functionId', 'productNutrientsTask'),
-            ('body', body),
-            ('appid', 'ld'),
-            ('client', 'apple'),
-            ('clientVersion', '8.5.5'),
-            ('networkType', 'wifi'),
-            ('osVersion', '13.4'),
-            ('jsonp', 'jsonp_1585199207082_64917'),
-        )
-        headers = {
-            'Host': 'api.m.jd.com',
-            'Accept': '*/*',
-            'Connection': 'keep-alive',
-            'User-Agent': 'jdapp;iPhone;8.5.5;13.4;;network/wifi;supportApplePay/3;hasUPPay/0;pushNoticeIsOpen/0;model/iPhone9,2;addressid/138109592;hasOCPay/0;appBuild/167121;supportBestPay/0;jdSupportDarkMode/0;pv/105.24;apprpd/MyJD_Main;ref/https%3A%2F%2Fbean.m.jd.com%2FplantBean%2Findex.action%3Fsource%3Dwojing%26lng%3D116.845010%26lat%3D39.957812%26sid%3Dea687233c5e7d226b30940ed7382c5cw%26un_area%3D5_274_49707_49973;psq/2;ads/;psn/9b812b59e055cd226fd60ebb5fd0981c4d0d235d|236;jdv/0|direct|-|none|-|1583449735697|1583796810;adk/;app_device/IOS;pap/JA2015_311210|8.5.5|IOS 13.4;Mozilla/5.0 (iPhone; CPU iPhone OS 13_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
-            'Accept-Language': 'zh-cn',
-            'Referer': 'https://bean.m.jd.com/AttentionProduct',
-            'Accept-Encoding': 'gzip, deflate, br',
-        }
-        response = requests.get('https://api.m.jd.com/client.action',
-                                headers=headers, params=params, cookies=cookies)
-        result = _jsonp2dict(response.text)
-        time.sleep(1)
-        if "data" in result:
-            if result["data"]["nutrState"] == '1':
-                limit -= 1
+        if i["dailyTimes"] == 1 and i["gainedNum"] == "0" and i["taskType"] != 8:
+            print(i)
+            taskResult = functionTemplate(cookies, "receiveNutrientsTask", {
+                "monitor_refer": "receiveNutrientsTask", "awardType": str(i["taskType"])})
+            print(taskResult)
+            time.sleep(2)
+        if i["taskType"] == 7 and i["isFinished"] == 0:  # 金融双签 有时候不出现在taskList
+            taskResult = functionTemplate(cookies, "receiveNutrientsTask", {
+                "monitor_refer": "receiveNutrientsTask", "awardType": str(i["taskType"])})
+            print(taskResult)
+            time.sleep(2)
+        if i["taskType"] == 3 and i["isFinished"] == 0:
+            print("浏览店铺")
+            N = int(i["totalNum"])-int(i["gainedNum"])
+            plant_shopList = functionTemplate(cookies, "shopTaskList", {
+                                              "monitor_refer": "plant_receiveNutrients"})["data"]
+            goodShopList = [
+                i for i in plant_shopList["goodShopList"] if i["taskState"] == "2"]
+            moreShopList = [
+                i for i in plant_shopList["moreShopList"] if i["taskState"] == "2"]
+            shopList = goodShopList + moreShopList
+            for shop in shopList:
+                shopTaskId = shop["shopTaskId"]
+                shopId = shop["shopId"]
+                result = functionTemplate(cookies, "shopNutrientsTask", {
+                                          "monitor_refer": "plant_shopNutrientsTask", "shopId": str(shopId), "shopTaskId": str(shopTaskId)})
                 print(result)
-        if limit == 0:
-            break
+                if "data" in result:
+                    if result["data"]["nutrState"] == "1":
+                        N -= 1
+                if N == 0:
+                    break
+                time.sleep(1)
+        if i["taskType"] == 10 and i["isFinished"] == 0:
+            print("关注频道")
+            N = int(i["totalNum"])-int(i["gainedNum"])
+            plant_ChannelList = functionTemplate(
+                cookies, "plantChannelTaskList", {})["data"]
+            goodChannelList = [
+                i for i in plant_ChannelList["goodChannelList"] if i["taskState"] == "2"]
+            normalChannelList = [
+                i for i in plant_ChannelList["normalChannelList"] if i["taskState"] == "2"]
+            channelList = goodChannelList+normalChannelList
 
-
-def _shopTaskList(cookies):
-    """
-    关注任务-浏览店铺
-    # limit=4
-    """
-    params = (
-        ('functionId', 'shopTaskList'),
-        ('body', '{"monitor_source":"plant_m_plant_index","monitor_refer":"plant_shopList","version":"8.4.0.0"}'),
-        ('appid', 'ld'),
-        ('client', 'apple'),
-        ('clientVersion', '8.5.5'),
-        ('networkType', 'wifi'),
-        ('osVersion', '13.4'),
-        ('jsonp', 'jsonp_1585206113100_24906'),
-    )
-    response = requests.get('https://api.m.jd.com/client.action',
-                            headers=headers, params=params, cookies=cookies)
-
-    result = _jsonp2dict(response.text)
-    time.sleep(1)
-    data = result["data"]
-    goodShopList = data["goodShopList"]
-    moreShopList = data["moreShopList"]
-    shopList = goodShopList + moreShopList
-    limit = 4
-    for i in shopList:
-        time.sleep(0.4)
-        shopTaskId = i["shopTaskId"]
-        shopId = i["shopId"]
-        body = f"""{{"shopTaskId":"{shopTaskId}","shopId":"{shopId}","monitor_source":"plant_m_plant_index","monitor_refer":"plant_shopNutrientsTask","version":"8.4.0.0"}}"""
-
-        params = (
-            ('functionId', 'shopNutrientsTask'),
-            ('body', body),
-            ('appid', 'ld'),
-            ('client', 'apple'),
-            ('clientVersion', '8.5.5'),
-            ('networkType', 'wifi'),
-            ('osVersion', '13.4'),
-            ('jsonp', 'jsonp_1585206964789_33053'),
-        )
-
-        response = requests.get('https://api.m.jd.com/client.action',
-                                headers=headers, params=params, cookies=cookies)
-        result = _jsonp2dict(response.text)
-        if "data" in result:
-            if result["data"]["nutrState"] == '1':
-                limit -= 1
+            for channel in channelList:
+                result = functionTemplate(cookies, "plantChannelNutrientsTask", {"channelTaskId": channel["channelTaskId"], "channelId": channel["channelId"]
+                                                                                 })
                 print(result)
-        if limit == 0:
-            break
+                if "data" in result:
+                    if result["data"]["nutrState"] == "1":
+                        N -= 1
+                if N == 0:
+                    break
+                time.sleep(1)
+        if i["taskType"] == 5 and i["isFinished"] == 0:
+            print("挑选商品")
+            N = int(i["totalNum"])-int(i["gainedNum"])
+            productInfoList = functionTemplate(cookies, "productTaskList", {
+                                               "monitor_refer": "plant_productTaskList"})["data"]["productInfoList"]
+            productList = sum(productInfoList, [])
+            productList = list(
+                filter(lambda i: i["taskState"] == "2", productList))
+
+            for product in productList:
+                result = functionTemplate(cookies, "productNutrientsTask", {
+                                          "productTaskId": product["productTaskId"], "skuId": product["skuId"], "monitor_refer": "plant_productNutrientsTask"})
+                print(result)
+                if "data" in result:
+                    if result["data"]["nutrState"] == "1":
+                        N -= 1
+                if N == 0:
+                    break
+                time.sleep(1)
 
 
-def _double_signin(cookies):
-    """
-    receiveNutrientsTask
-    金融双签
-    """
-    params = (
-        ('functionId', 'receiveNutrientsTask'),
-        ('body', '{"awardType":"7","monitor_source":"plant_m_plant_index","monitor_refer":"plant_receiveNutrientsTask","version":"8.4.0.0"}'),
-        ('appid', 'ld'),
-        ('client', 'apple'),
-        ('clientVersion', '8.5.6'),
-        ('networkType', 'wifi'),
-        ('osVersion', '13.4'),
-        ('jsonp', 'jsonp_1585269770133_17771'),
-    )
-    response = requests.get('https://api.m.jd.com/client.action',
-                            headers=headers, params=params, cookies=cookies)
-    result = response.text
-    print(result)
+def _help(cookies, plantUuid):
+    for i in plantUuid:
+        functionTemplate(cookies, "plantBeanIndex", {
+                         "plantUuid": i, "followType": "1", "wxHeadImgUrl": "", "shareUuid": "", })
 
 
-def _plantChannelTaskList(cookies):
-    # 直接返回json，非jsonp
-    params = (
-        ('functionId', 'plantChannelTaskList'),
-        ('body', '{}'),
-        ('appid', 'ld'),
-    )
-    response = requests.get('https://api.m.jd.com/client.action',
-                            headers=headers, params=params, cookies=cookies)
-    # print(response.text)
-    result = json.loads(response.text)
-    # print("ok")
+def steal(cookies, roundId):
+    print("\n【偷取营养液】\n默认对方有3个才会偷取\n不足自动跳过 ")
+    pageNum = 1
+    while("data" in functionTemplate(cookies, "plantFriendList", {"pageNum": str(pageNum)})):
+        time.sleep(2)
+        result = functionTemplate(cookies, "plantFriendList", {
+                                  "pageNum": str(pageNum)})
+        # print(result)
+        if "tips" in result["data"]:
+            print("今日已达上限")
+            # exit()
+            return
+        # exit()
+        stealList = [i for i in result["data"]
+                     ["friendInfoList"] if "nutrCount" in i]
 
-    data = result["data"]
-    channelList = data["goodChannelList"] + data["normalChannelList"]
-    limit = 3
-    for i in channelList:
-        time.sleep(1)
-        channelTaskId = i["channelTaskId"]
-        channelId = i["channelId"]
-        body = f"""{{"channelTaskId":"{channelTaskId}","channelId":"{channelId}"}}"""
-        params = (
-            ('functionId', 'plantChannelNutrientsTask'),
-            ('body', body),
-            ('appid', 'ld'),
-        )
-        response = requests.get('https://api.m.jd.com/client.action',
-                                headers=headers, params=params, cookies=cookies)
-        
-        result = json.loads(response.text)
+        for i in stealList:
 
-        nutrNum = result["data"]["nutrNum"]
-        limit -= nutrNum
-        print(result)
-        if limit == 0:
-            break
+            if int(i["nutrCount"]) == 3:  # 为3时才会偷取
+                print(i)
+                print(functionTemplate(cookies, "collectUserNutr", {
+                    "paradiseUuid": i["paradiseUuid"], "roundId": roundId}))
+                time.sleep(2)
 
 
-def _purchaseRewardTask(cookies, roundId):
-    """
-    逛逛会场
-    """
-    params = (
-        ('functionId', 'purchaseRewardTask'),
-        ('body', f"""{{"roundId":"{roundId}","monitor_source":"plant_m_plant_index","monitor_refer":"plant_purchaseRewardTask","version":"8.4.0.0"}}"""),
-        ('appid', 'ld'),
-        ('client', 'apple'),
-        ('clientVersion', '8.5.5'),
-        ('networkType', 'wifi'),
-        ('osVersion', '13.4'),
-        ('jsonp', 'jsonp_1585269759756_14899'),
-    )
-    response = requests.get('https://api.m.jd.com/client.action',
-                            headers=headers, params=params, cookies=cookies)
-    result = response.text
-    print(result)
+def getReward(cookies, status):
+    print("\n[收获状况]")
+    if status == "5":
+        data = functionTemplate(
+            cookies, "receivedBean", {"roundId": lastRoundId})["data"]
+        print(f"""{data["growth"]}成长值兑换{data["awardBean"]}京豆""")
+    if status == "6":
+        print("您已领奖，去京豆明细页看看")
 
 
-print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+def water(cookies):
+    print("\n[浇水ing]")
+    result = functionTemplate(cookies, "cultureBean", {
+        "roundId": currentRoundId, "monitor_refer": "plant_index"})
+    if "errorMessage" in result:
+        print(result["errorMessage"])
+        return
 
-for cookies in cookiesList:
-    roundId, name, (growth, nutrients), timeNutrientsRes, awardList, flags = plantBeanIndex(
-        cookies)
 
-    print(f"  [ {name} ]")
-    print(f"成长值:{growth},营养液:{nutrients}")
+def egg(cookies):
+    print("\n[天天扭蛋]")
+    restLotteryNum = functionTemplate(cookies, "plantEggLotteryIndex", {})[
+        "data"]["restLotteryNum"]
+    if restLotteryNum == 0:
+        print(">>>暂无扭蛋")
+    for i in range(restLotteryNum):
+        print(">>>扭蛋 ", i+1)
+        functionTemplate(cookies, "plantEggDoLottery", {})
 
-    daily_signin1, shop_2_1, product_2_2, channel_2_3, mall_4, double_5_1 = _awardList(
-        awardList)
-    print("每日任务检查")
-    print("--"*10)
 
-    if daily_signin1 == "2":
-        print("[每日签到]   达成")
+def waterWheel(cookies):
+    print("\n[水车生产(6-21)]")
+    result = functionTemplate(cookies, "receiveNutrients", {
+        "roundId": currentRoundId, "monitor_refer": "plant_receiveNutrients"})
+    if "errorMessage" in result:
+        print(result["errorMessage"])
+        return
 
-    else:
-        # print("执行 [每日签到]") # todo
-        pass
-    if shop_2_1 == "2":
-        print("[浏览店铺]   达成")
-    else:
-        print("执行 [浏览店铺]")
-        _shopTaskList(cookies)
 
-    if product_2_2 == "2":
-        print("[挑选商品]   达成")
-    else:
-        print("执行 [挑选商品]")
-        _productTaskList(cookies)
+for cookies in jdCookie.get_cookies():
+    plantBeanIndex = functionTemplate(cookies, "plantBeanIndex", {})
 
-    if channel_2_3 == "2":
-        print("[关注频道]   达成")
-    else:
-        print("执行 [关注频道]")
-        _plantChannelTaskList(cookies)
+    print(
+        f"""【{plantBeanIndex["data"]["plantUserInfo"]["plantNickName"]}】\n""")
+    print(
+        f"""我的助力码: {plantBeanIndex["data"]["jwordShareInfo"]["shareUrl"].split("=")[-1]}\n""")
+    _help(cookies, plantUuid)
+    roundList = plantBeanIndex["data"]["roundList"]
+    lastRoundId = roundList[0]["roundId"]  # 上期id
+    currentRoundId = roundList[1]["roundId"]  # 本期id
+    taskList = plantBeanIndex["data"]["taskList"]  # 任务列表
+    takeTask(cookies, taskList)  # 执行每日任务
+    print("     任务   进度")
+    for i in functionTemplate(cookies, "plantBeanIndex", {})["data"]["taskList"]:
+        print(
+            f"""[{i["taskName"]}]  {i["gainedNum"]}/{i["totalNum"]}   {i["isFinished"]} """)
 
-    if mall_4 == "2":
-        print("[逛逛会场]   达成")
-    else:
-        print("执行 [逛逛会场]")
-        _purchaseRewardTask(cookies, roundId)
-
-    if double_5_1 == "2":
-        print("[金融双签]   达成")
-    else:
-        print("执行 [金融双签]")
-        _double_signin(cookies)
-    print("--"*10)
-
-    waterwheel(timeNutrientsRes, roundId, cookies)  # 水车收营养液
-
-    roundId, _, (_, nutrients), _, _, _ = plantBeanIndex(cookies)
-    if nutrients != "0":
-        use_nutrient(cookies, roundId)         # 营养液换成长值
-    else:
-        print("跳过浇水")
-    print("*"*8+"检查完毕"+"*"*8)
-    print("\n")
-
+    egg(cookies)
+    waterWheel(cookies)
+    steal(cookies, currentRoundId)
+    water(cookies)
+    getReward(cookies, roundList[0]["awardState"])
+    print("\nEND\n")
+    print("##"*30)

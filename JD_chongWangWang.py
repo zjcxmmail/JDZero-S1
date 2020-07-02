@@ -595,6 +595,6 @@ for cookies in jdCookie.get_cookies():
 
     getPetTaskConfig(cookies)
     enterRoom(cookies)
-    get_desk(cookies)
+    #get_desk(cookies) #活动下线
     feed(cookies, FEED_NUM)
     print("--"*25)

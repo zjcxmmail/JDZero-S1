@@ -5,13 +5,11 @@ import jdCookie
 
 
 """
-测试版
-1、收金果
-2、每日签到
-3、分享
-其他功能待测试
+收、卖
+七日签到
+三餐签到
+分享
 
-cron */6 * * * *   # 表示每6分钟收取一次，自行设定运行间隔
 """
 
 headers = {
@@ -32,7 +30,6 @@ def user_info(cookies):
     }
     response = requests.post(
         f'https://ms.jr.jd.com/gw/generic/uc/h5/m/login?_={int(time.time()*1000)}', headers=headers, data=data, cookies=cookies)
-
     return (response.json()['resultData']['data'])
 
 
@@ -45,11 +42,20 @@ def harvest(cookies, userInfo):
 
     response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/harvest?_={int(time.time()*1000)}',
                              headers=headers, data=data, cookies=cookies)
-    treeInfo=json.loads(response.text)["resultData"]["data"]["treeInfo"]
+    treeInfo = json.loads(response.text)["resultData"]["data"]["treeInfo"]
     # print(treeInfo)
     print(treeInfo["treeName"])
-    print("金果数量: ",treeInfo["fruit"])
-    print("升级剩余: ",treeInfo["progressLeft"])
+    print("金果数量: ", treeInfo["fruit"])
+    print("升级剩余: ", treeInfo["progressLeft"])
+
+
+def sell(cookies):
+    print("\n sell")
+    time.sleep(1)
+    data = 'reqData={"source":2,"riskDeviceParam":"{\\"fp\\":\\"\\",\\"eid\\":\\"\\",\\"sdkToken\\":\\"\\",\\"sid\\":\\"\\"}"}'
+    response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/sell?_={int(time.time()*1000)}',
+                             headers=headers, data=data, cookies=cookies)
+    print(response.text)
 
 
 def sign(cookies, userInfo):
@@ -63,11 +69,10 @@ def sign(cookies, userInfo):
     print(response.text)
 
 
-
 def share(cookies, userInfo):
     # 分享任务  test
     print("分享任务  test")
-    time.sleep(2)
+    time.sleep(1)
     data = 'reqData={"source":0,"workType":2,"opType":1}'
     response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/doWork?_{int(time.time()*1000)}', headers=headers,
                              cookies=cookies, data=data)
@@ -79,36 +84,55 @@ def share(cookies, userInfo):
     print(response.text)
 
 
-def dayWork(cookies,userInfo):
+def dayWork(cookies, userInfo):
     time.sleep(1)
-    data = 'reqData={"source":2,"linkMissonIds":["666","667"],"LinkMissonIdValues":[7,7]}'
+    data = {
+        'reqData': json.dumps({"source": 2, "linkMissionIds": ["666", "667"], "LinkMissionIdValues": [7, 7]})
+    }
     response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/dayWork?_{int(time.time()*1000)}', headers=headers,
                              cookies=cookies, data=data)
-    data=json.loads(response.text)["resultData"]["data"]
-    dailyTask=[i for i in data if i["prizeType"]==2]
+    data = json.loads(response.text)["resultData"]["data"]
+    dailyTask = [i for i in data if i["prizeType"] == 2]
     time.sleep(1)
     for i in dailyTask:
-        # print(i,"\n")
-        if i["workType"]==1 : # 每天签到
-            print("【签到】")
-            if i["workStatus"]==0:
+
+        if i["workType"] == 1:  # 三餐签到
+            print("【三餐签到】")
+            if i["workStatus"] == 0:
                 sign(cookies, userInfo)
-            if i["workStatus"]==2:
+            if i["workStatus"] == 2:
                 print("ok")
-        if i["workType"]==2:  #每日分享
+        if i["workType"] == 2:  # 每日分享
             print("【分享】")
-            if i["workStatus"]==0:
+            if i["workStatus"] == 0:
                 share(cookies, userInfo)
-            if i["workStatus"]==2:
+            if i["workStatus"] == 2:
                 print("ok")
 
 
+def signOne(cookies):
+    print("\n【连续签到】")
+    data = 'reqData={"source":2}'
+    response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/signIndex?_{int(time.time()*1000)}', headers=headers,
+                             cookies=cookies, data=data)
+    data = json.loads(response.text)["resultData"]["data"]
+    if data["canSign"] == 2:
+        body = {'reqData': json.dumps(
+            {"source": 2, "signDay": data["signDay"]})}
+        response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/signOne?_{int(time.time()*1000)}', headers=headers,
+                                 cookies=cookies, data=body)
+        result = json.loads(response.text)
+        print(result)
+    if data["canSign"] == 1:
+        print("ok")
 
 
 for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
+    signOne(cookies)
     userInfo = user_info(cookies)
-    dayWork(cookies,userInfo)
-    harvest(cookies, userInfo)    #收获
+    dayWork(cookies, userInfo)
+    harvest(cookies, userInfo)  # 收获
+    sell(cookies)               # 卖出
     print("\n")
     print("###"*20)

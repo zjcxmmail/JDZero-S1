@@ -64,7 +64,7 @@ def water(cookies, totalWaterTaskTimes):
     if totalWaterTaskTimes >= waterTimesLimit:
         print("跳过浇水")
         print("已达今日最大浇水次数 ", waterTimesLimit)
-        print("请自行修改 waterTimesLimit")
+        print("\n请自行修改 waterTimesLimit")
         return
     n = waterTimesLimit-totalWaterTaskTimes
     for i in range(int(totalEnergy/10)):
@@ -137,9 +137,12 @@ def _help(cookies, shareCodes):
 def masterHelp(cookies):
     print("\n【助力得水】")
     help_me_list = postTemplate(cookies, "masterHelpTaskInitForFarm", {})
+    # print(help_me_list)
+    masterHelpPeoples = len(help_me_list["masterHelpPeoples"])
     print(
-        f"""完成进度 {len(help_me_list["masterHelpPeoples"])}/5   {help_me_list["f"]}""")
-    if not help_me_list["f"]:
+        f"""完成进度 {masterHelpPeoples}/5   {help_me_list["f"]}""")
+    if not help_me_list["f"] and masterHelpPeoples >= 5:
+        print("领取奖励")
         help_me_list1 = postTemplate(
             cookies, "masterGotFinishedTaskForFarm", {})
         print(help_me_list1)

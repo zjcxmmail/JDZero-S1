@@ -14,7 +14,6 @@ import time
 
 FEED_NUM=10   # [10,20,40,80]
 
-
 def steal(cookies):
 
     headers = {
@@ -587,14 +586,50 @@ def get_desk(cookies):
                                  headers=headers, data=data, cookies=cookies)
         print(response.text)
         # time.sleep(10)
+def task_video(cookies):
+    print("\n【 激励视频 】")
+    headers = {
+        'Host': 'draw.jdfcloud.com',
+        'Accept': '*/*',
+        'Accept-Language': 'zh-cn',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Content-Type': 'application/json',
+        'reqSource': 'weapp',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/7.0.14(0x17000e22) NetType/WIFI Language/zh_CN',
+        'Referer': 'https://servicewechat.com/wxccb5c536b0ecd1bf/605/page-frame.html',
+        'Connection': 'keep-alive',
+    }
+    params = (('reqSource', 'weapp'),)
 
+    response = requests.get('https://draw.jdfcloud.com//pet/getPetTaskConfig',
+                            headers=headers, params=params, cookies=cookies)
+    petTask = json.loads(response.text)["datas"]
+    ViewVideo = [i for i in petTask if i["taskType"]
+                 == "ViewVideo"][0]
+    joinedCount = ViewVideo["joinedCount"]
+    if not joinedCount:
+        joinedCount = 0
+    if ViewVideo["taskChance"] == joinedCount:
+        print(" 今日观看完毕")
+        return
+    for i in range(ViewVideo["taskChance"]-joinedCount):
+        print(f"""观看视频 [{i}]""")
+        data = {
+            'taskType': "ViewVideo",
+            'reqSource': 'weapp'
+        }
+
+        response = requests.post('https://draw.jdfcloud.com//pet/scan',
+                                 headers=headers, cookies=cookies, data=json.dumps(data))
+        print(response.text)
+        time.sleep(1)
 
 for cookies in jdCookie.get_cookies():
     print("\n")
     print(f"""[ {cookies["pt_pin"]} ]""")
-
     getPetTaskConfig(cookies)
-    enterRoom(cookies)
+    task_video(cookies)
+    enterRoom(cookies)   
     #get_desk(cookies) #活动下线
     feed(cookies, FEED_NUM)
     print("--"*25)

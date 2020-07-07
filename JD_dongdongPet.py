@@ -124,7 +124,7 @@ def takeTask(cookies):
     if _threeMealInit["timeRange"] == -1:
         _time = " 时间未到"
     else:
-        _time = _threeMealInit["threeMealTimes"][_threeMealInit["timeRange"]]
+        _time = _threeMealInit["threeMealTimes"][_threeMealInit["timeRange"]-1]
     print(
         f"""[三餐福袋]: {_threeMealInit["finished"]}   ({_time})""")
     if _threeMealInit["timeRange"] != -1 and not _threeMealInit["finished"]:  # 时间 、未完成

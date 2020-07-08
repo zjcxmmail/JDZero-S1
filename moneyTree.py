@@ -116,7 +116,19 @@ def signOne(cookies):
     response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/signIndex?_{int(time.time()*1000)}', headers=headers,
                              cookies=cookies, data=data)
     data = json.loads(response.text)["resultData"]["data"]
+    # print(data)
+    if "awardStatus" in data:
+        if data["awardStatus"]==1:
+            print("领取 连续签到奖励")
+            body = {'reqData': json.dumps(
+            {"source": 2, "awardType": 2})}
+            response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/getSignAward?_{int(time.time()*1000)}', headers=headers,
+                                 cookies=cookies, data=body)
+            print(response.text)
+            print(">>>今日暂未签到，下次运行可签到")
+            return 
     if data["canSign"] == 2:
+        print("执行连续签到")
         body = {'reqData': json.dumps(
             {"source": 2, "signDay": data["signDay"]})}
         response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/signOne?_{int(time.time()*1000)}', headers=headers,
@@ -124,7 +136,7 @@ def signOne(cookies):
         result = json.loads(response.text)
         print(result)
     if data["canSign"] == 1:
-        print("ok")
+        print("今日已完成连续签到")
 
 
 for cookies in jdCookie.get_cookies():

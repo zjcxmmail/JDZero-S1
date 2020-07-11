@@ -169,33 +169,38 @@ def clockIn(cookies):
         print(postTemplate(cookies, "clockInForFarm", {"type": 1}))
 
     if "themes" in clockInInit:
-        print(f""">>> 限时关注得水滴 {clockInInit["myFollowThemeConfigTimes"]}/3""")
-        for i in [i["id"] for i in clockInInit["themes"] if not i["hadGot"]]:
-            print(f"""关注id [{i}]""")
-            postTemplate(cookies, "clockInFollowForFarm", {
-                         "id": i, "type": "theme", "step": 1})
-            time.sleep(0.5)
-            postTemplate(cookies, "clockInFollowForFarm", {
-                         "id": i, "type": "theme", "step": 2})
-            time.sleep(0.5)
+        if clockInInit["themes"]:
+            print(
+                f""">>> 限时关注得水滴 {clockInInit["myFollowThemeConfigTimes"]}/3""")
+            for i in [i["id"] for i in clockInInit["themes"] if not i["hadGot"]]:
+                print(f"""关注id [{i}]""")
+                postTemplate(cookies, "clockInFollowForFarm", {
+                    "id": i, "type": "theme", "step": 1})
+                time.sleep(0.5)
+                postTemplate(cookies, "clockInFollowForFarm", {
+                    "id": i, "type": "theme", "step": 2})
+                time.sleep(0.5)
 
     if "venderCoupons" in clockInInit:
-        print(f""">>> 限时领券得水滴 {clockInInit["myFollowVenderCouponTimes"]}/3""")
-        for i in [i["id"] for i in clockInInit["venderCoupons"] if not i["hadGot"] and i["hadStock"]]:
-            print(f"""领券id [{i}]""")
-            print(i)
-            time.sleep(0.5)
-            postTemplate(cookies, "clockInFollowForFarm",
-                         {"id": i, "type": "venderCoupon", "step": 1})
-            time.sleep(0.5)
-            postTemplate(cookies, "clockInFollowForFarm",
-                         {"id": i, "type": "venderCoupon", "step": 2})
-            time.sleep(0.5)
+        if clockInInit["venderCoupons"]:
+            print(
+                f""">>> 限时领券得水滴 {clockInInit["myFollowVenderCouponTimes"]}/3""")
+            for i in [i["id"] for i in clockInInit["venderCoupons"] if not i["hadGot"] and i["hadStock"]]:
+                print(f"""领券id [{i}]""")
+                print(i)
+                time.sleep(0.5)
+                postTemplate(cookies, "clockInFollowForFarm",
+                             {"id": i, "type": "venderCoupon", "step": 1})
+                time.sleep(0.5)
+                postTemplate(cookies, "clockInFollowForFarm",
+                             {"id": i, "type": "venderCoupon", "step": 2})
+                time.sleep(0.5)
 
 
 for cookies in jdCookie.get_cookies():
     initFarm(cookies)
     clockIn(cookies)
+    # exit()
     _help(cookies, shareCodes)
     totalWaterTaskTimes = takeTask(cookies)
     masterHelp(cookies)

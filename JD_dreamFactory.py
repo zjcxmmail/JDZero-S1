@@ -12,8 +12,9 @@ import time
 [x]3、欢迎留下sharePin互助
 
 目前功能:
-收取发电机、投入电力
+收取发电机、投入电力    cron 0 * * * * JD_dreamFactory.py  
 领电力-每日计划 (部分)
+领电力-生产成就 
 [x]助力他人,目前无法实现
 
 """
@@ -61,8 +62,10 @@ def taskList(cookies):
     return response.json()["data"]["userTaskStatusList"]
 
 
-def help(cookies, sharePin):
+def help(cookies, assistCondition, encryptPin):
     for sharePin in sharePins:
+        if sharePin == encryptPin:
+            continue
         params = (
             ('zone', 'dream_factory'),
             ('pin', ''),
@@ -73,9 +76,25 @@ def help(cookies, sharePin):
             ('sceneval', '2'),
         )
 
-        requests.get('https://wq.jd.com/dreamfactory/userinfo/GetUserInfo',
-                     headers=headers, params=params, cookies=cookies)
+        response = requests.get('https://wq.jd.com/dreamfactory/userinfo/GetUserInfo',
+                                headers=headers, params=params, cookies=cookies)
         time.sleep(0.4)
+        assistCondition = response.json()["data"]["assistCondition"]
+        assistConditionMsg = assistCondition["assistConditionMsg"]
+        print(assistConditionMsg)
+        if "您今日帮助TA的机会已用完，请明天再来~" == assistConditionMsg:
+            # print("跳过")
+            return
+        if not assistConditionMsg:
+            print("开始助力")
+            params = (
+                ('zone', 'dream_factory'),
+                ('sharepin', sharePin),
+            )
+
+            response = requests.get('https://jxa.jd.com/wq.jd.com/dreamfactory/friend/AssistFriend',
+                                    headers=headers, params=params, cookies=cookies)
+            print(response.text)
     # return response.json()
 
 
@@ -200,30 +219,41 @@ for cookies in jdCookie.get_cookies():
     factoryInfo = userInfo(cookies)
     # print(factoryInfo)
     factoryId = factoryInfo["data"]["factoryList"][0]["factoryId"]
-    production=factoryInfo["data"]["productionList"][0]
+    production = factoryInfo["data"]["productionList"][0]
     productionId = production["productionId"]
     encryptPin = factoryInfo["data"]["user"]["encryptPin"]
-    print(f"""\n我的sharePin: {encryptPin}\n""")
-    print(f"""生产进度: {int(production["investedElectric"]/production["needElectric"]*10000)/100}%""")
-    collect(cookies, factoryId, productionId)        # 收集电力 使用电力
+    assistCondition = factoryInfo["data"]["assistCondition"]
+    # print(f"""\n我的sharePin: {encryptPin}\n""")
+    print(
+        f"""生产进度: {int(production["investedElectric"]/production["needElectric"]*10000)/100}%""")
+    collect(cookies, factoryId, productionId)
+    # help(cookies, assistCondition, encryptPin)
     userTaskStatusList = taskList(cookies)
     achievementsTask = [
         i for i in userTaskStatusList if i["dateType"] == 1]  # 生产成就
-    dailyTask = [i for i in userTaskStatusList if i["dateType"]
-                 == 2]  # 每日计划
-    
+    dailyTask = [i for i in userTaskStatusList if i["dateType"] == 2]  # 每日计划
 
-    print("【每日计划(未完成)】")
+    print("\n   【生产成就(未完成)】")
+    for i in achievementsTask:
+        if i["awardStatus"] == 1:  # 已经领取，跳过
+            continue
+        print(i["taskName"],
+              f"""        {i["completedTimes"]}/{i["targetTimes"]}""")
+        if i["completedTimes"] >= i["targetTimes"]:
+            getAward(cookies, i["taskId"])
+
+    print("\n\n   【每日计划(未完成)】")
     for i in dailyTask:
         if i["awardStatus"] == 1:  # 已经领取，跳过
             continue
-        print(i["taskName"], f"""        {i["completedTimes"]}/{i["targetTimes"]}""")
-        if i["taskType"] == 2 or i["taskType"] == 3:  # 看广告+给工厂打广告  dotask 和getAward   
+        print(i["taskName"],
+              f"""        {i["completedTimes"]}/{i["targetTimes"]}""")
+        if i["taskType"] == 2 or i["taskType"] == 3:  # 看广告+给工厂打广告  dotask 和getAward
             print(i)
             doTask(cookies, i["taskId"])
             time.sleep(0.5)
             getAward(cookies, i["taskId"])
-        if i["taskType"] == 6:  # 集市浏览5  getAward      
+        if i["taskType"] == 6:  # 集市浏览5  getAward
             print(i)
             doTask_5(cookies)
         if i["taskType"] == 1:
@@ -240,6 +270,7 @@ for cookies in jdCookie.get_cookies():
         if i["taskType"] in [4, 5, 10]:   # 累计  getAward
             if i["completedTimes"] >= i["targetTimes"]:
                 getAward(cookies, i["taskId"])
-    #exit()
+    # exit()
+
     print("\n")
     print("##"*30)

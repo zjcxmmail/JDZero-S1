@@ -7,13 +7,14 @@ import time
 """
 京喜工厂
 1、从jdCookie.py处填写 cookie
-2、sharePin 为自己的助力码，但是需要别人为自己助力
-3、欢迎留下sharePin互助
+2、需要进入小游戏中手动选择物品
+[x]2、sharePin 为自己的助力码，但是需要别人为自己助力
+[x]3、欢迎留下sharePin互助
 
 目前功能:
 收取发电机、投入电力
-领电力-每日计划
-助力他人
+领电力-每日计划 (部分)
+[x]助力他人,目前无法实现
 
 """
 
@@ -204,7 +205,7 @@ for cookies in jdCookie.get_cookies():
     encryptPin = factoryInfo["data"]["user"]["encryptPin"]
     print(f"""\n我的sharePin: {encryptPin}\n""")
     print(f"""生产进度: {int(production["investedElectric"]/production["needElectric"]*10000)/100}%""")
-    collect(cookies, factoryId, productionId)
+    collect(cookies, factoryId, productionId)        # 收集电力 使用电力
     userTaskStatusList = taskList(cookies)
     achievementsTask = [
         i for i in userTaskStatusList if i["dateType"] == 1]  # 生产成就

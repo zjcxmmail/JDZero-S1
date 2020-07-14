@@ -5,7 +5,7 @@ import time
 
 
 """
-京喜工厂
+京喜工厂（弃坑）
 1、从jdCookie.py处填写 cookie
 2、需要进入小游戏中手动选择物品
 [x]2、sharePin 为自己的助力码，但是需要别人为自己助力

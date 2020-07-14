@@ -28,7 +28,7 @@ def functionTemplate(cookies, functionId, body):
     data = {'body': json.dumps(body), 'appid': "wh5", "clientVersion": "9.0.4"}
     response = requests.post('https://api.m.jd.com/client.action',
                              headers=headers, params=params, cookies=cookies, data=data)
-    return json.loads(response.text)
+    return response.json()
 
 
 def feedPets(cookies):
@@ -80,6 +80,7 @@ def help(cookies, shareCodes):
 def masterHelp(cookies):
     print("\n【好友助力】")
     masterHelpInit = functionTemplate(cookies, "masterHelpInit", {})["result"]
+    # print(masterHelpInit)
     print(f"""助力进度: ({len(masterHelpInit["masterHelpPeoples"])}/5)""")
     if not masterHelpInit["helpLimitFlag"]:
         print("未完成好友助力任务")
@@ -131,27 +132,22 @@ def takeTask(cookies):
         print(f"""执行threeMeal{_threeMealInit["timeRange"]}""")
         print(functionTemplate(cookies, "getThreeMealReward", {}))
 
-    # _browseSingleShopInit = taskList["browseSingleShopInit"]  # 浏览单个店铺
-    # # print(_browseSingleShopInit)
-    # print(f"""[指定店铺]: {_browseSingleShopInit["finished"]}""")
-    # if not _browseSingleShopInit["finished"]:
-    #     print(functionTemplate(
-    #         cookies, "getSingleShopReward", {"index": 0, "type": 1}))
-    #     print(functionTemplate(
-    #         cookies, "getSingleShopReward", {"index": 0, "type": 2}))
-    _browseSingleShopInit2 = taskList["browseSingleShopInit2"]  # 浏览单个店铺2
-    print(f"""[指定店铺]: {_browseSingleShopInit2["finished"]}""")
-    if not _browseSingleShopInit2["finished"]:
-        print(functionTemplate(
-            cookies, "getSingleShopReward", {"index": 1, "type": 1}))
-        print(functionTemplate(
-            cookies, "getSingleShopReward", {"index": 1, "type": 2}))
+    browseSingleShopList = [
+        i for i in taskList["taskList"] if "browseSingleShopInit" in i]  # 逛逛会场
+    # print(browseSingleShopList)
+    for i in browseSingleShopList:
+        browseSingleShopInit = taskList[i]
+        print(f"""[逛逛会场]: {browseSingleShopInit["finished"]}""")
+        if not browseSingleShopInit["finished"]:
+            print(functionTemplate(
+                cookies, "getSingleShopReward", {"index": browseSingleShopInit["index"], "type": 1}))
+            print(functionTemplate(
+                cookies, "getSingleShopReward", {"index": browseSingleShopInit["index"], "type": 2}))
 
     # _browseShopsInit = taskList["browseShopsInit"]  # 浏览店铺 多次
     # print(f"""[多个店铺]: {_browseShopsInit["finished"]}""")
     # if not _browseShopsInit["finished"]:
     #     print(functionTemplate(cookies, "getBrowseShopsReward", {}))
-    
 
     _firstFeedInit = taskList["firstFeedInit"]  # 每日首次投喂  手动
     print(f"""[首次投喂]: {_firstFeedInit["finished"]}""")
@@ -171,8 +167,11 @@ def takeTask(cookies):
 for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
     status = functionTemplate(cookies, "initPetTown", {})["result"]
+    # print(status)
     print("\n【检查状态】")
-    print(f"""宠物等级: {status["petSportStatus"]}""")
+    print(f"""兑换奖品: {status["goodsInfo"]["goodsName"]}""")
+    print(
+        f"""勋章进度: {status["medalNum"]}/{status["goodsInfo"]["exchangeMedalNum"]}""")
     print(f"""还需能量: {status["needCollectEnergy"]}""")
     print(f"""当前进度: {status["medalPercent"]}%""")
     print(f"""当前饵料: {status["foodAmount"]}""")

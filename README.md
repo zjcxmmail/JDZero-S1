@@ -9,7 +9,7 @@
 - 东东萌宠 JD_dongdongPet.py
 - 宠汪汪   JD_chongWangWang.py
 - 摇钱树   moneyTree.py
-- 京喜工厂 JD_dreamFactory.py
+- 京喜工厂 JD_dreamFactory.py (弃坑)
 
 
 ![种豆得豆](jd_plantBean.jpg)

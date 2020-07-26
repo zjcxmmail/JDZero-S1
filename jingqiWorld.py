@@ -8,7 +8,7 @@ import jdCookie
 
 """
 京奇世界-王牌分拣员
-自行抓包、填充 luckHome(cookies) 和 exchange(cookies)中的 data的所需参数
+自行抓包、填充 luckHome(cookies) 和 exchange(cookies)中的 data
 """
 
 
@@ -79,15 +79,9 @@ def luckHome(cookies):
     )
 
     data = {
-        'body': '',
-        'client': '',
-        'clientVersion': '',
-        'openudid': '',
-        'sign': '',
-        'st': '',
-        'sv': '',
-    }
-    if not data["sign"]:
+        
+    }    ### 此处填充
+    if not data:
         print("需要填充 luckHome(cookies) 中的data")
         exit()
 
@@ -111,15 +105,9 @@ def exchange(cookies):
     )
 
     data = {
-        'body': '',
-        'client': '',
-        'clientVersion': '',
-        'openudid': '',
-        'sign': '',
-        'st': '',
-        'sv': '',
-    }
-    if not data["sign"]:
+        
+    }   ### 此处填充
+    if not data:
         print("需要填充 exchange(cookies) 中的data")
         exit()
 

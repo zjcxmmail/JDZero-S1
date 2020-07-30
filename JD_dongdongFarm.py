@@ -10,7 +10,7 @@ import time
 4、waterTimesLimit 自定义的每天浇水最大次数，防止浪费
 
 """
-waterTimesLimit = 24
+waterTimesLimit = 30
 shareCodes = ["c081c648576e4e61a9697c3981705826",
               "f1d0d5ebda7c48c6b3d262d5574315c7",
               "13d13188218a4e3aae0c4db803c81985"]
@@ -25,7 +25,6 @@ def postTemplate(cookies, functionId, body):
     params = (
         ('functionId', functionId),
     )
-    body = body
     data = {
         'body': json.dumps(body),
         "appid": "wh5",
@@ -33,6 +32,25 @@ def postTemplate(cookies, functionId, body):
     }
     response = requests.post(
         'https://api.m.jd.com/client.action', headers=headers, cookies=cookies, data=data, params=params)
+    return response.json()
+
+
+def getTemplate(cookie, functionId, body):
+    headers = {
+        'User-Agent': 'JD4iPhone/167249 (iPhone; iOS 13.5.1; Scale/3.00)',
+        'Host': 'api.m.jd.com',
+        # 'Content-Type': 'application/x-www-form-urlencoded',
+    }
+    body["version"] = 4
+    body["channel"] = 1
+    params = (
+        ('functionId', functionId),  # initForTurntableFarm
+        ('body', json.dumps(body)),
+        ('appid', 'wh5'),
+    )
+
+    response = requests.get('https://api.m.jd.com/client.action',
+                            headers=headers, params=params, cookies=cookies)
     return response.json()
 
 
@@ -46,14 +64,19 @@ def luck(cookies):
 
 
 def initFarm(cookies):
-    result = postTemplate(cookies, 'initForFarm', {"version": 2})
+    result = postTemplate(cookies, 'initForFarm', {"version": 4})
     # print(result)
+    # exit()
     nickName = result["farmUserPro"]["nickName"]
     myshareCode = result["farmUserPro"]["shareCode"]
+    treeEnergy = result["farmUserPro"]["treeEnergy"]
+    lastTimes = int((result["farmUserPro"]["treeTotalEnergy"]-treeEnergy)/10)
     print(f"""\n\n[ {nickName} ]\n{result["farmUserPro"]["name"]}""")
     print(f"""我的助力码: {myshareCode}""")
     print(
-        f"""treeEnergy: {result["farmUserPro"]["treeEnergy"]}/{result["farmUserPro"]["treeTotalEnergy"]}""")
+        f"""treeEnergy: {treeEnergy}/{result["farmUserPro"]["treeTotalEnergy"]}""")
+    print(
+        f"""预计浇水次数: {lastTimes}""")
 
 
 def water(cookies, totalWaterTaskTimes):
@@ -79,7 +102,9 @@ def water(cookies, totalWaterTaskTimes):
             print("\n可能水果已经成熟,退出浇水")
             return
         if waterInfo["waterStatus"] == 1:
-            print(postTemplate(cookies, "gotStageAwardForFarm", {}))
+            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 1}))
+        if waterInfo["waterStatus"] == 2:
+            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 3}))
         n -= 1
 
 
@@ -87,9 +112,9 @@ def takeTask(cookies):
     print("\n【任务列表】")
 
     taskList = postTemplate(cookies, "taskInitForFarm", {})
+    # print(taskList["taskOrder"])
     if "signInit" in taskList:
         _signInit = taskList["signInit"]  # 连续签到
-        # print(_signInit)
         print(f"""todaySigned: {_signInit["todaySigned"]}""")
         if not _signInit["todaySigned"]:
             print("连续签到")
@@ -108,7 +133,7 @@ def takeTask(cookies):
 
     _gotThreeMealInit = taskList["gotThreeMealInit"]  # 定时领水 6-9，11-14，17-21
     print(f"""ThreeMeal: {_gotThreeMealInit["f"]}""")
-    if _gotThreeMealInit["f"] == False:
+    if not _gotThreeMealInit["f"]:
         print("三餐定时领取")
         postTemplate(cookies, "gotThreeMealForFarm", {})
 
@@ -127,7 +152,7 @@ def takeTask(cookies):
 
     _waterRainInit = taskList["waterRainInit"]  # 收集水滴雨
     print(f"""waterRain: {_waterRainInit["winTimes"]}/2""")
-    if _waterRainInit["f"] == False:
+    if not _waterRainInit["f"]:
         print(">>>>水滴雨")
         postTemplate(cookies, "waterRainForFarm", {
             "type": 1, "hongBaoTimes": 100, "version": 3})
@@ -136,16 +161,13 @@ def takeTask(cookies):
 
 def _help(cookies, shareCodes):
     for i in shareCodes:
-        postTemplate(cookies, "initForFarm", {
-            "imageUrl": "", "nickName": "", "shareCode": i, "babelChannel": "3", "version": 2, "channel": 1})
+        postTemplate(cookies, "initForFarm", {"shareCode": i})
 
 
 def masterHelp(cookies):
     print("\n【助力得水】")
     help_me_list = postTemplate(cookies, "masterHelpTaskInitForFarm", {})
-    # print(help_me_list)
     masterHelpPeoples = len(help_me_list["masterHelpPeoples"])
-    # exit()
     print(
         f"""完成进度 {masterHelpPeoples}/5   {help_me_list["f"]}""")
     if not help_me_list["f"] and masterHelpPeoples >= 5:
@@ -159,9 +181,11 @@ def clockIn(cookies):
     print("\n【打卡领水】")
     clockInInit = postTemplate(
         cookies, "clockInInitForFarm", {})
-    # print(clockInInit)
-    if clockInInit["gotClockInGift"]:  # 惊喜礼包 todo
-        print("TODO:\ngotClockInGift")
+    # print("f", clockInInit["f"])
+    # print("totalSigned", clockInInit["totalSigned"])
+    # print("gotClockInGift", clockInInit["gotClockInGift"])
+    if clockInInit["totalSigned"] == 7 and not clockInInit["gotClockInGift"]:  # 惊喜礼包
+        print('[领取惊喜礼包]', postTemplate(cookies, "clockInForFarm", {"type": 2}))
 
     print(f"""todaySigned: {clockInInit["todaySigned"]}""")
     if not clockInInit["todaySigned"]:
@@ -197,10 +221,29 @@ def clockIn(cookies):
                 time.sleep(0.5)
 
 
+def turnTable(cookies):
+    print("\n【天天抽奖】")
+    result = getTemplate(cookies, "initForTurntableFarm", {})
+    if not result["timingGotStatus"] and result["sysTime"]-result["timingLastSysTime"] > 14400000:  # 领取定时奖励
+        print('[定时奖励] ', getTemplate(
+            cookies, "timingAwardForTurntableFarm", {}))
+    print(
+        f"""为我助力: {result["masterHelpTimes"]}/{result["helpedTimesByOther"]}""")
+
+    for i in shareCodes:
+        getTemplate(cookies, "initForFarm", {"shareCode": f"{i}-3"})  # 助力
+
+    result = getTemplate(cookies, "initForTurntableFarm", {})
+    for i in range(result["remainLotteryTimes"]):  # 抽奖次数
+        print(f'[抽奖 {i}] ', getTemplate(
+            cookies, "lotteryForTurntableFarm", {"type": 1}))  # 抽奖
+        time.sleep(0.4)
+
+
 for cookies in jdCookie.get_cookies():
     initFarm(cookies)
+    turnTable(cookies)
     clockIn(cookies)
-    # exit()
     _help(cookies, shareCodes)
     totalWaterTaskTimes = takeTask(cookies)
     masterHelp(cookies)

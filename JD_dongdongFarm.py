@@ -65,8 +65,6 @@ def luck(cookies):
 
 def initFarm(cookies):
     result = postTemplate(cookies, 'initForFarm', {"version": 4})
-    # print(result)
-    # exit()
     nickName = result["farmUserPro"]["nickName"]
     myshareCode = result["farmUserPro"]["shareCode"]
     treeEnergy = result["farmUserPro"]["treeEnergy"]
@@ -98,13 +96,13 @@ def water(cookies, totalWaterTaskTimes):
         time.sleep(0.2)
         waterInfo = postTemplate(cookies, "waterGoodForFarm", {})
         print(waterInfo)
-        if waterInfo["code"] == "6":
-            print("\n可能水果已经成熟,退出浇水")
+        if waterInfo["finished"]:
+            print("\n水果成熟,退出浇水")
             return
         if waterInfo["waterStatus"] == 1:
-            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 1}))
+            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 1}))  # 奖励30水
         if waterInfo["waterStatus"] == 2:
-            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 3}))
+            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 2}))  # 奖励40水
         n -= 1
 
 
@@ -181,9 +179,6 @@ def clockIn(cookies):
     print("\n【打卡领水】")
     clockInInit = postTemplate(
         cookies, "clockInInitForFarm", {})
-    # print("f", clockInInit["f"])
-    # print("totalSigned", clockInInit["totalSigned"])
-    # print("gotClockInGift", clockInInit["gotClockInGift"])
     if clockInInit["totalSigned"] == 7 and not clockInInit["gotClockInGift"]:  # 惊喜礼包
         print('[领取惊喜礼包]', postTemplate(cookies, "clockInForFarm", {"type": 2}))
 
@@ -218,7 +213,6 @@ def clockIn(cookies):
                 time.sleep(0.5)
                 postTemplate(cookies, "clockInFollowForFarm",
                              {"id": i, "type": "venderCoupon", "step": 2})
-                time.sleep(0.5)
 
 
 def turnTable(cookies):

@@ -53,3 +53,4 @@ def get_cookies():
 print("***"*20)
 print("***"*20)
 print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+print("\n报错请至 https://github.com/Zero-S1/JD_tools\n")

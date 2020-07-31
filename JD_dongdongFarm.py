@@ -65,6 +65,9 @@ def luck(cookies):
 
 def initFarm(cookies):
     result = postTemplate(cookies, 'initForFarm', {"version": 4})
+    # print(result)
+    toFlowTimes = result["toFlowTimes"]
+    toFruitTimes = result["toFruitTimes"]
     nickName = result["farmUserPro"]["nickName"]
     myshareCode = result["farmUserPro"]["shareCode"]
     treeEnergy = result["farmUserPro"]["treeEnergy"]
@@ -75,9 +78,10 @@ def initFarm(cookies):
         f"""treeEnergy: {treeEnergy}/{result["farmUserPro"]["treeTotalEnergy"]}""")
     print(
         f"""预计浇水次数: {lastTimes}""")
+    return toFlowTimes, toFruitTimes
 
 
-def water(cookies, totalWaterTaskTimes):
+def water(cookies, totalWaterTaskTimes,toFlowTimes, toFruitTimes):
     print("\n【Water】")
     totalEnergy = postTemplate(cookies, "initForFarm", {"version": 2})[
         "farmUserPro"]["totalEnergy"]
@@ -99,10 +103,12 @@ def water(cookies, totalWaterTaskTimes):
         if waterInfo["finished"]:
             print("\n水果成熟,退出浇水")
             return
-        if waterInfo["waterStatus"] == 1:
+        if waterInfo["treeEnergy"] == 10:
             print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 1}))  # 奖励30水
-        if waterInfo["waterStatus"] == 2:
+        if waterInfo["treeEnergy"] == toFlowTimes*10:
             print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 2}))  # 奖励40水
+        if waterInfo["treeEnergy"] == toFruitTimes*10:
+            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 3}))  # 奖励50水
         n -= 1
 
 
@@ -235,13 +241,13 @@ def turnTable(cookies):
 
 
 for cookies in jdCookie.get_cookies():
-    initFarm(cookies)
+    toFlowTimes, toFruitTimes=initFarm(cookies)
     turnTable(cookies)
     clockIn(cookies)
     _help(cookies, shareCodes)
     totalWaterTaskTimes = takeTask(cookies)
     masterHelp(cookies)
     luck(cookies)
-    water(cookies, totalWaterTaskTimes)
+    water(cookies, totalWaterTaskTimes,toFlowTimes, toFruitTimes)
     print("\n")
     print("##"*30)

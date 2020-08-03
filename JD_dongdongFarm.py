@@ -237,7 +237,7 @@ def turnTable(cookies):
     for i in range(result["remainLotteryTimes"]):  # 抽奖次数
         print(f'[抽奖 {i}] ', getTemplate(
             cookies, "lotteryForTurntableFarm", {"type": 1}))  # 抽奖
-        time.sleep(0.4)
+        time.sleep(2)
 
 
 for cookies in jdCookie.get_cookies():

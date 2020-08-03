@@ -35,7 +35,7 @@ def postTemplate(cookies, functionId, body):
     return response.json()
 
 
-def getTemplate(cookie, functionId, body):
+def getTemplate(cookies, functionId, body):
     headers = {
         'User-Agent': 'JD4iPhone/167249 (iPhone; iOS 13.5.1; Scale/3.00)',
         'Host': 'api.m.jd.com',

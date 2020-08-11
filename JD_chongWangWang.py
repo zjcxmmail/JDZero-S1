@@ -42,15 +42,16 @@ def getTemplate(cookies, functionId, params):
 
 
 def postTemplate(cookies, functionId, data):
+    headers["Content-Type"] = "application/x-www-form-urlencoded"
     response = requests.post(f'https://draw.jdfcloud.com//pet/{functionId}',
-                             headers=headers, cookies=cookies, data=json.dumps(data))
+                             headers=headers, cookies=cookies, data=data)
     return response.json()
 
 
 def postTemplate2(cookies, functionId, data):
-    headers["Content-Type"] = "application/x-www-form-urlencoded"
+    headers["Content-Type"] = "application/json"
     response = requests.post(f'https://draw.jdfcloud.com//pet/{functionId}',
-                             headers=headers, cookies=cookies, data=data)
+                             headers=headers, cookies=cookies, data=json.dumps(data))
     return response.json()
 
 
@@ -60,12 +61,9 @@ def enterRoom(cookies):
     进入房间；喂养后刷新
     """
     data = getTemplate(cookies, "enterRoom", ())["data"]
-    # print(data)
-    # exit()
     petFood = data["petFood"]
     feedCount = data["feedCount"]
     petLevel = data["petLevel"]
-
     print(
         f"""  
 现有积分: {data["petCoin"]}
@@ -78,9 +76,11 @@ def enterRoom(cookies):
     if not data["bubbleOpen"]:
         print("暂无")
     else:
-        # print("getBubbleReward  todo")  # TODO
+        print("getBubbleReward  todo")  # TODO
         print(data["bubbleReward"])
-        print(postTemplate(cookies, "getBubbleReward", data["bubbleReward"]))  # TODO 未知bug
+        time.sleep(1)
+        print(postTemplate(cookies, "getBubbleReward", data["bubbleReward"]))
+        print(postTemplate2(cookies, "getBubbleReward", data["bubbleReward"]))
 
 
 def feed(cookies, feedCount):
@@ -108,13 +108,15 @@ def takeTask(cookies):
                                   (('taskType', 'SignEveryDay'),)))
 
         if i["taskType"] == "FollowShop":  # 关注店铺
+            # print(i)
+            # exit()
             shopIDs = [j["shopId"]
                        for j in i["followShops"] if not j["status"]]
             print(shopIDs)
             for shopId in shopIDs:
-                print(shopId)
+                # print(shopId)
                 time.sleep(0.5)
-                print(postTemplate2(cookies, "followShop", {"shopId": shopId}))
+                print(postTemplate(cookies, "followShop", {"shopId": shopId}))
                 time.sleep(1)
 
         if i["taskType"] == "ScanMarket":  # 逛逛会场
@@ -123,7 +125,7 @@ def takeTask(cookies):
             for addr in marketLists:
                 data = {"marketLink": str(
                     addr), "taskType": "ScanMarket", "reqSource": "weapp"}
-                print(postTemplate(cookies, "scan", data))
+                print(postTemplate2(cookies, "scan", data))
                 time.sleep(1)
 
         if i["taskType"] == "FollowChannel":  # 关注频道
@@ -132,7 +134,7 @@ def takeTask(cookies):
             for addr in lists:
                 data = {"channelId": str(
                     addr), "taskType": "FollowChannel", "reqSource": "weapp"}
-                print(postTemplate(cookies, "scan", data))
+                print(postTemplate2(cookies, "scan", data))
                 time.sleep(1)
 
         if i["taskType"] == "ViewVideo":  # 激励视频
@@ -141,11 +143,15 @@ def takeTask(cookies):
                 print(postTemplate(cookies, "scan", {
                       'taskType': "ViewVideo", 'reqSource': 'weapp'}))
                 time.sleep(1)
+                print(postTemplate2(cookies, "scan", {
+                      'taskType': "ViewVideo", 'reqSource': 'weapp'}))
 
         if i["taskType"] == "FollowGood":  # 关注商品
             skus = [j["sku"] for j in i["followGoodList"] if not j["status"]]
             print(skus)
             for sku in skus:
+                print(postTemplate(cookies, "followGood",
+                                   {'sku': str(sku)}))   # bug
                 print(postTemplate2(cookies, "followGood", {'sku': str(sku)}))
 
         if i["taskType"] == "ThreeMeals":  # 每日三餐
@@ -223,3 +229,4 @@ for cookies in jdCookie.get_cookies():
     enterRoom(cookies)
     desk(cookies)
     print("##"*25)
+

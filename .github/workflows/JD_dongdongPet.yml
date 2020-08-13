@@ -2,7 +2,7 @@ name: JD_dongdongPet
 
 on:
   schedule:
-    - cron: '30 3,9,15,16,22'
+    - cron: '30 3,9,15,16,22 * * *'
 jobs:
   build:
     runs-on: ubuntu-latest

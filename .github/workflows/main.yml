@@ -20,5 +20,5 @@ jobs:
 
         
       - name: 'run' 
-        run: python3 hello.py
+        run: python3 test.py
         

@@ -222,7 +222,7 @@ for cookies in jdCookie.get_cookies():
 
 for cookies in jdCookie.get_cookies():
     print("\n")
-    print(f"""[ {cookies["pt_pin"]} ]""")
+    # print(f"""[ {cookies["pt_pin"]} ]""")
     # feed(cookies, FEED_NUM)
     takeTask(cookies)
     ScanMarket_extra(cookies)

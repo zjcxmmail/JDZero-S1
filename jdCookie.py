@@ -1,6 +1,8 @@
 import requests
 import json
 import time
+import os
+import re
 
 """
 1、抓包，登录 https://bean.m.jd.com 点击签到并且出现签到日历后
@@ -12,7 +14,7 @@ import time
 多账号准备
 过期检查
 """
-
+###############################
 cookies1={
 'pt_key': '',    #cookie参数填写
 'pt_pin': '',
@@ -22,6 +24,21 @@ cookies2={}   # 如果有其它账号，还需要将cookies2填写进 下面的c
 
 cookiesLists=[cookies1,]  #多账号准备
 
+####################################
+# GitHub action 相关 请参照 action.md
+if "JD_COOKIE" in os.environ:
+    """
+    判断是否运行自 GitHub action, "JD_COOKIE" 该参数与 repo里的Secrets的名称保持一致
+    """
+    print("执行自GitHub action")
+    secret = os.environ["JD_COOKIE"]
+    cookiesList = []  # 重置cookiesList
+    for line in secret.split('\n'):
+        pt_pin = re.findall(r'pt_pin=(.*?)&', line)[0]
+        pt_key = re.findall(r'pt_key=(.*?)$', line)[0]
+        cookiesList.append({"pt_pin": pt_pin, "pt_key": pt_key})
+
+#######################################
 
 def valid(cookies):
     headers = {
@@ -54,3 +71,8 @@ print("***"*20)
 print("***"*20)
 print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 print("\n报错请至 https://github.com/Zero-S1/JD_tools\n")
+
+if __name__ == "__main__":
+    print(">>>检查有效性")
+    for i in get_cookies():
+        print(i)

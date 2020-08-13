@@ -1,6 +1,8 @@
 name: JD_speed
 
 on:
+  push:
+    
   schedule:
     - cron: '0 * * * * '
 jobs:

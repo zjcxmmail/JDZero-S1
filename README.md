@@ -12,6 +12,7 @@
 - 宠汪汪   JD_chongWangWang.py
 - 摇钱树   moneyTree.py
 - 京喜工厂 JD_dreamFactory.py (弃坑)
+- 京小超  JD_superMarket.py
 
 
 ![种豆得豆](jd_plantBean.jpg)

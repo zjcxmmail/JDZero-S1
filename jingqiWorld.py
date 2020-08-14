@@ -9,7 +9,7 @@ import jdCookie
 """
 京奇世界-王牌分拣员
 自行抓包、填充 luckHome(cookies) 和 exchange(cookies)中的 data
-对应的需要抓取的url
+对应的需要抓取的url  京东app内抓包，不是直接进点击
 - https://api.m.jd.com/client.action?functionId=luckHome             # 进入抽奖页面
 - https://api.m.jd.com/client.action?functionId=convertAward         # 实际抽奖
 """

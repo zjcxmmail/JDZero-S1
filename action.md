@@ -46,3 +46,6 @@ cron 0 0 * * *   #此处表示在国际标准时间0点（北京时间+8，即�
 ```
 
 此外，GitHub action的分钟有误差，目前具体未知，大概延迟5分钟（即以上表达式大约在8:05左右运行），请自行调整
+
+## 参考
+http://www.ruanyifeng.com/blog/2019/09/getting-started-with-github-actions.html

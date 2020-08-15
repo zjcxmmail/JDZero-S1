@@ -19,7 +19,7 @@ def functionTemplate(cookies, functionId, body):
         'Host': 'api.m.jd.com',
         'Accept': '*/*',
         'Connection': 'keep-alive',
-        'User-Agent': 'JD4iPhone/167249 (iPhone;iOS 13.5.1;Scale/3.00)',
+        'User-Agent': 'JD4iPhone/167283 (iPhone;iOS 13.5.1;Scale/3.00)',
         'Accept-Language': 'zh-Hans-CN;q=1,en-CN;q=0.9',
         'Accept-Encoding': 'gzip, deflate, br',
         'Content-Type': "application/x-www-form-urlencoded"
@@ -27,6 +27,7 @@ def functionTemplate(cookies, functionId, body):
     if "version" not in body:
         body["version"] = "9.0.0.1"
     body["monitor_source"] = "plant_app_plant_index"
+    body["monitor_refer"] = ""
     params = (
         ('functionId', functionId),
         ('body', json.dumps(body)),
@@ -34,34 +35,52 @@ def functionTemplate(cookies, functionId, body):
     )
     response = requests.get('https://api.m.jd.com/client.action',
                             headers=headers, params=params, cookies=cookies)
-    return json.loads(response.text)
+    return response.json()
+
+
+def postTemplate(cookies, functionId, body):
+    headers = {
+        'Host': 'api.m.jd.com',
+        'Accept': '*/*',
+        'Connection': 'keep-alive',
+        'User-Agent': 'JD4iPhone/167283 (iPhone;iOS 13.5.1;Scale/3.00)',
+        'Accept-Language': 'zh-Hans-CN;q=1,en-CN;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Content-Type': "application/x-www-form-urlencoded"
+    }
+    params = (
+        ('functionId', functionId),
+    )
+    body["version"] = "9.0.0.1"
+    body["monitor_source"] = "plant_app_plant_index"
+    body["monitor_refer"] = ""
+
+    data = {
+        'area': '5_274_49707_49973',
+        'body': json.dumps(body),
+        'appid': 'ld',
+        'build': '167283',
+        'client': 'apple',
+        'clientVersion': '9.0.4',
+    }
+    response = requests.post('https://api.m.jd.com/client.action',
+                             headers=headers, params=params, cookies=cookies, data=data)
+    return response.json()
 
 
 def takeTask(cookies, taskList):
-    # for i in taskList:
-    #     print(i,"\n")
-    time.sleep(2)
-    taskResult = functionTemplate(cookies, "receiveNutrientsTask", {
-        "monitor_refer": "receiveNutrientsTask", "awardType": "7"})  # 金融双签 额外
-    # print(taskResult)
-    time.sleep(2)
-    taskResult = functionTemplate(cookies, "receiveNutrientsTask", {
-        "monitor_refer": "plant_receiveNutrientsTask", "awardType": "4"})  # 逛逛会场
-    # print(taskResult)
     for i in taskList:
+        if i["isFinished"] == 1:
+            continue
+        print(i["taskName"])
+        if i["dailyTimes"] == 1 and i["taskType"] != 8:  # 不含评价
+            # print(i)
+            taskResult = functionTemplate(cookies, "receiveNutrientsTask", {
+                "monitor_refer": "receiveNutrientsTask", "awardType": str(i["taskType"])})
+            print(taskResult)
+            time.sleep(2)
 
-        if i["dailyTimes"] == 1 and i["gainedNum"] == "0" and i["taskType"] != 8:
-            print(i)
-            taskResult = functionTemplate(cookies, "receiveNutrientsTask", {
-                "monitor_refer": "receiveNutrientsTask", "awardType": str(i["taskType"])})
-            print(taskResult)
-            time.sleep(2)
-        if i["taskType"] == 7 and i["isFinished"] == 0:  # 金融双签 有时候不出现在taskList
-            taskResult = functionTemplate(cookies, "receiveNutrientsTask", {
-                "monitor_refer": "receiveNutrientsTask", "awardType": str(i["taskType"])})
-            print(taskResult)
-            time.sleep(2)
-        if i["taskType"] == 3 and i["isFinished"] == 0:
+        if i["taskType"] == 3:
             print("浏览店铺")
             N = int(i["totalNum"])-int(i["gainedNum"])
             plant_shopList = functionTemplate(cookies, "shopTaskList", {
@@ -83,7 +102,7 @@ def takeTask(cookies, taskList):
                 if N == 0:
                     break
                 time.sleep(1)
-        if i["taskType"] == 10 and i["isFinished"] == 0:
+        if i["taskType"] == 10:
             print("关注频道")
             N = int(i["totalNum"])-int(i["gainedNum"])
             plant_ChannelList = functionTemplate(
@@ -104,7 +123,7 @@ def takeTask(cookies, taskList):
                 if N == 0:
                     break
                 time.sleep(1)
-        if i["taskType"] == 5 and i["isFinished"] == 0:
+        if i["taskType"] == 5:
             print("挑选商品")
             N = int(i["totalNum"])-int(i["gainedNum"])
             productInfoList = functionTemplate(cookies, "productTaskList", {
@@ -139,11 +158,12 @@ def steal(cookies, roundId):
         result = functionTemplate(cookies, "plantFriendList", {
                                   "pageNum": str(pageNum)})
         # print(result)
+        if "errorCode" in result:
+            return
         if "tips" in result["data"]:
             print("今日已达上限")
-            # exit()
             return
-        # exit()
+
         stealList = [i for i in result["data"]
                      ["friendInfoList"] if "nutrCount" in i]
 
@@ -196,8 +216,7 @@ def waterWheel(cookies):
 
 
 for cookies in jdCookie.get_cookies():
-    plantBeanIndex = functionTemplate(cookies, "plantBeanIndex", {})
-
+    plantBeanIndex = postTemplate(cookies, "plantBeanIndex", {})
     print(
         f"""【{plantBeanIndex["data"]["plantUserInfo"]["plantNickName"]}】\n""")
     print(
@@ -207,9 +226,10 @@ for cookies in jdCookie.get_cookies():
     lastRoundId = roundList[0]["roundId"]  # 上期id
     currentRoundId = roundList[1]["roundId"]  # 本期id
     taskList = plantBeanIndex["data"]["taskList"]  # 任务列表
+
     takeTask(cookies, taskList)  # 执行每日任务
     print("     任务   进度")
-    for i in functionTemplate(cookies, "plantBeanIndex", {})["data"]["taskList"]:
+    for i in postTemplate(cookies, "plantBeanIndex", {})["data"]["taskList"]:
         print(
             f"""[{i["taskName"]}]  {i["gainedNum"]}/{i["totalNum"]}   {i["isFinished"]} """)
 

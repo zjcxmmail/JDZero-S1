@@ -199,6 +199,9 @@ def desk(cookies):
                             headers=headers_app, cookies=cookies)
     result = response.json()
     deskGoods = result["data"]["deskGoods"]
+    if not deskGoods:
+        print("活动下线")
+        return
     followCount = result["data"]["followCount"]
     taskChance = result["data"]["taskChance"]
     print(f""" {followCount}/{taskChance}""")

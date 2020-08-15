@@ -15,8 +15,9 @@ import re
 过期检查
 """
 ###############################
+# 方案1 本地执行  下载到本地，填写参数，执行
 cookies1={
-'pt_key': '',    #cookie参数填写
+'pt_key': '',    #cookie参数填写，填写完注意不要上传
 'pt_pin': '',
 }
 
@@ -24,8 +25,9 @@ cookies2={}   # 如果有其它账号，还需要将cookies2填写进 下面的c
 
 cookiesLists=[cookies1,]  #多账号准备
 
+
 ####################################
-# GitHub action 相关 请参照 action.md
+# 方案2 GitHub action 自动运行    cookies读取自secrets  具体请参照 action.md
 if "JD_COOKIE" in os.environ:
     """
     判断是否运行自 GitHub action, "JD_COOKIE" 该参数与 repo里的Secrets的名称保持一致

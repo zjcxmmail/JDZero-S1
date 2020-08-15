@@ -6,7 +6,7 @@ import re
 
 """
 1、抓包，登录 https://bean.m.jd.com 点击签到并且出现签到日历后
-2、返回抓包，搜索关键词 functionId=signBean 复制Cookie中的pt_key与pt_pin填入以下两个空白处
+2、返回抓包，搜索关键词 functionId=signBean 复制Cookie中的pt_key与pt_pin
 3、注意，cookies会过期,大约为一个月
 4、python3.6+ 环境，需要requests包
 

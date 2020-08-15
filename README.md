@@ -15,4 +15,3 @@
 - 京小超  JD_superMarket.py
 
 
-![种豆得豆](jd_plantBean.jpg)

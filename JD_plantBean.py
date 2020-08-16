@@ -5,7 +5,7 @@ import jdCookie
 
 """
 1、从jdCookie.py处填写 cookie
-2、shareCode 为自己的助力码，但是需要别人为自己助力
+2、plantUuid 为自己的助力码，但是需要别人为自己助力
 3、欢迎留下plantUuid互助
 """
 

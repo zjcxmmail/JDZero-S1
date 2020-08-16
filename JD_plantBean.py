@@ -5,7 +5,7 @@ import jdCookie
 
 """
 1、从jdCookie.py处填写 cookie
-2、plantUuid 为自己的助力码，但是需要别人为自己助力
+2、shareCode 为自己的助力码，但是需要别人为自己助力
 3、欢迎留下plantUuid互助
 """
 
@@ -152,28 +152,22 @@ def _help(cookies, plantUuid):
 
 def steal(cookies, roundId):
     print("\n【偷取营养液】\n默认对方有3个才会偷取\n不足自动跳过 ")
-    pageNum = 1
-    while("data" in functionTemplate(cookies, "plantFriendList", {"pageNum": str(pageNum)})):
-        time.sleep(2)
-        result = functionTemplate(cookies, "plantFriendList", {
-                                  "pageNum": str(pageNum)})
-        # print(result)
-        if "errorCode" in result:
-            return
-        if "tips" in result["data"]:
-            print("今日已达上限")
-            return
+    result = functionTemplate(cookies, "plantFriendList", {"pageNum": "1"})
 
-        stealList = [i for i in result["data"]
-                     ["friendInfoList"] if "nutrCount" in i]
+    if "errorCode" in result:
+        return
+    if "tips" in result["data"]:
+        print("今日已达上限")
+        return
+    stealList = [i for i in result["data"]
+                 ["friendInfoList"] if "nutrCount" in i]
 
-        for i in stealList:
-
-            if int(i["nutrCount"]) == 3:  # 为3时才会偷取
-                print(i)
-                print(functionTemplate(cookies, "collectUserNutr", {
-                    "paradiseUuid": i["paradiseUuid"], "roundId": roundId}))
-                time.sleep(2)
+    for i in stealList:
+        if int(i["nutrCount"]) == 3:  # 为3时才会偷取
+            print(i)
+            print(functionTemplate(cookies, "collectUserNutr", {
+                "paradiseUuid": i["paradiseUuid"], "roundId": roundId}))
+            time.sleep(2)
 
 
 def getReward(cookies, status):

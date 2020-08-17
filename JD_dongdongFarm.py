@@ -7,10 +7,15 @@ import time
 1、从jdCookie.py处填写 cookie
 2、shareCode 为自己的助力码，但是需要别人为自己助力
 3、欢迎留下shareCode互助
-4、waterTimesLimit 自定义的每天浇水最大次数，防止浪费
+4、waterTimesLimit 自定义的每天浇水最大次数
+5、retainWaterLimit 完成10次浇水任务的基础上,希望水滴始终高于此数;优先级高于waterTimesLimit
+6、水滴高于100时,默认使用翻倍卡;其他情况不使用道具
 
 """
-waterTimesLimit = 30
+waterTimesLimit = 25  # 自定义的每天浇水最大次数
+retainWaterLimit = 100  # 完成10次浇水任务的基础上,希望水滴始终高于此数
+waterFriendLimit = 3  # [0,3]   0: 始终不替他人浇水   3: 替他人浇水3次以完成任务获得40水
+
 shareCodes = ["c081c648576e4e61a9697c3981705826",
               "f1d0d5ebda7c48c6b3d262d5574315c7",
               "13d13188218a4e3aae0c4db803c81985"]
@@ -28,7 +33,7 @@ def postTemplate(cookies, functionId, body):
     data = {
         'body': json.dumps(body),
         "appid": "wh5",
-        "clientVersion": "9.0.4"
+        "clientVersion": "9.1.0"
     }
     response = requests.post(
         'https://api.m.jd.com/client.action', headers=headers, cookies=cookies, data=data, params=params)
@@ -39,12 +44,11 @@ def getTemplate(cookies, functionId, body):
     headers = {
         'User-Agent': 'JD4iPhone/167249 (iPhone; iOS 13.5.1; Scale/3.00)',
         'Host': 'api.m.jd.com',
-        # 'Content-Type': 'application/x-www-form-urlencoded',
     }
     body["version"] = 4
     body["channel"] = 1
     params = (
-        ('functionId', functionId),  # initForTurntableFarm
+        ('functionId', functionId),
         ('body', json.dumps(body)),
         ('appid', 'wh5'),
     )
@@ -64,6 +68,8 @@ def luck(cookies):
 
 
 def initFarm(cookies):
+    if shareCodes:
+        postTemplate(cookies, 'initForFarm', {"inviteCode": shareCodes[0]})
     result = postTemplate(cookies, 'initForFarm', {"version": 4})
     # print(result)
     toFlowTimes = result["toFlowTimes"]
@@ -81,11 +87,25 @@ def initFarm(cookies):
     return toFlowTimes, toFruitTimes
 
 
-def water(cookies, totalWaterTaskTimes,toFlowTimes, toFruitTimes):
+def water(cookies, totalWaterTaskTimes, toFlowTimes, toFruitTimes):
     print("\n【Water】")
     totalEnergy = postTemplate(cookies, "initForFarm", {"version": 2})[
         "farmUserPro"]["totalEnergy"]
     print(f"当前水滴: {totalEnergy}")
+    doubleCard = postTemplate(cookies, "myCardInfoForFarm",
+                              {"version": 4, "channel": 1})["doubleCard"]
+    # print("检索[水滴翻倍卡]")
+    if doubleCard > 0 and totalEnergy >= 100:
+        print("存在[水滴翻倍卡],且水滴高于100")
+        for i in range(doubleCard):
+            print("使用[翻倍卡]", postTemplate(cookies, "userMyCardForFarm",
+                                          {"cardType": "doubleCard"}))
+
+    if postTemplate(cookies, "taskInitForFarm", {})["totalWaterTaskInit"]["totalWaterTaskTimes"] >= 10 and totalEnergy < retainWaterLimit+10:
+        print(
+            f"""10次浇水完成,保留水滴{totalEnergy}g (retainWaterLimit={retainWaterLimit} 限制)""")
+        print("跳出自动浇水")
+        return
     if totalWaterTaskTimes >= waterTimesLimit:
         print("跳过浇水")
         print("已达今日最大浇水次数 ", waterTimesLimit)
@@ -98,25 +118,81 @@ def water(cookies, totalWaterTaskTimes,toFlowTimes, toFruitTimes):
             return
         print(f"自动浇水...[{i}]")
         time.sleep(0.2)
-        waterInfo = postTemplate(cookies, "waterGoodForFarm", {})
-        print(waterInfo)
+        waterInfo = postTemplate(cookies, "waterGoodForFarm", {})  # 实际浇水
+        totalEnergy = waterInfo["totalEnergy"]
+        totalWaterTimes = waterInfo["totalWaterTimes"]
         if waterInfo["finished"]:
             print("\n水果成熟,退出浇水")
             return
         if waterInfo["treeEnergy"] == 10:
-            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 1}))  # 奖励30水
+            # 奖励30水
+            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 1}))
+            totalEnergy += 30
         if waterInfo["treeEnergy"] == toFlowTimes*10:
-            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 2}))  # 奖励40水
+            # 奖励40水
+            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 2}))
+            totalEnergy += 40
         if waterInfo["treeEnergy"] == toFruitTimes*10:
-            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 3}))  # 奖励50水
+            # 奖励50水
+            print(postTemplate(cookies, "gotStageAwardForFarm", {"type": 3}))
+            totalEnergy += 50
+        if totalWaterTimes >= 10 and totalEnergy < retainWaterLimit+10:
+            print(
+                f"""10次浇水完成,保留水滴{totalEnergy}g (retainWaterLimit= {retainWaterLimit}限制)""")
+            print("跳出自动浇水")
+            return
         n -= 1
+    print("水滴不足,跳出浇水")
+
+
+def friends(cookies):
+    print("\n【好友浇水】")
+    data = postTemplate(cookies, "friendListInitForFarm",
+                        {"version": 4, "channel": 1})
+    print(f"""今日邀请 {data["inviteFriendCount"]}/10""")
+    if waterFriendLimit == 0:
+        print("始终不为好友浇水\n跳过")
+        return
+    needWater = [i["shareCode"]
+                 for i in data["friends"] if i["friendState"] == 1]
+    waterFriendCountKey = postTemplate(cookies, "taskInitForFarm", {})[
+        "waterFriendTaskInit"]["waterFriendCountKey"]
+    print(f"今日为好友浇水次数:{waterFriendCountKey}")
+    needWater += shareCodes
+    if waterFriendCountKey >= waterFriendLimit:
+        print("助力浇水完成\n")
+        return
+    N = waterFriendLimit - waterFriendCountKey
+    for i in needWater:
+        if N == 0:
+            return
+        data = postTemplate(cookies, "waterFriendForFarm",
+                            {"shareCode": i, "version": 4, "channel": 1})
+        if data["code"] == "0":
+            N -= 1
+        if data["code"] == "11":
+            print("水滴不够,跳出")
+            return
+    # TODO
+
+
+def bag(cookies):
+    print("\n【背包】")
+    data = postTemplate(cookies, "myCardInfoForFarm",
+                        {"version": 4, "channel": 1})
+    beanCard = data['beanCard']
+    fastCard = data["fastCard"]
+    doubleCard = data["doubleCard"]
+    print(f"""水滴换豆卡 {beanCard}""")
+    print(f"""快速浇水卡 {fastCard}""")
+    print(f"""水滴翻倍卡 {doubleCard}""")
+    # postTemplate(cookies, "userMyCardForFarm", {"cardType":"fastCard"})   使用道具卡,TODO
 
 
 def takeTask(cookies):
     print("\n【任务列表】")
 
     taskList = postTemplate(cookies, "taskInitForFarm", {})
-    # print(taskList["taskOrder"])
     if "signInit" in taskList:
         _signInit = taskList["signInit"]  # 连续签到
         print(f"""todaySigned: {_signInit["todaySigned"]}""")
@@ -150,7 +226,7 @@ def takeTask(cookies):
     _totalWaterTaskInit = taskList["totalWaterTaskInit"]  # 每日累计浇水
     print(
         f"""totalWaterTask: {_totalWaterTaskInit["f"]}  ({_totalWaterTaskInit["totalWaterTaskTimes"]}/10)""")
-    if not _totalWaterTaskInit["f"]:
+    if not _totalWaterTaskInit["f"] and _totalWaterTaskInit["totalWaterTaskTimes"] >= 10:
         print("浇水10次奖励")
         postTemplate(cookies, "totalWaterTaskForFarm", {})
 
@@ -160,12 +236,22 @@ def takeTask(cookies):
         print(">>>>水滴雨")
         postTemplate(cookies, "waterRainForFarm", {
             "type": 1, "hongBaoTimes": 100, "version": 3})
+    _waterFriendTaskInit = taskList["waterFriendTaskInit"]
+    # print(_waterFriendTaskInit)
+    print(
+        f"""waterFriend: {_waterFriendTaskInit["waterFriendCountKey"]}/3   {_waterFriendTaskInit["f"]}""")
+    if not _waterFriendTaskInit["f"] and _waterFriendTaskInit["waterFriendCountKey"] >= 3:
+        print(">>>>帮助好友浇水奖励")
+        postTemplate(cookies, "waterFriendGotAwardForFarm",
+                     {"version": 4, "channel": 1})
     return _totalWaterTaskInit["totalWaterTaskTimes"]
 
 
 def _help(cookies, shareCodes):
     for i in shareCodes:
         postTemplate(cookies, "initForFarm", {"shareCode": i})
+        postTemplate(cookies, "initForFarm", {
+                     "shareCode": f"{i}-inviteFriend"})
 
 
 def masterHelp(cookies):
@@ -212,7 +298,6 @@ def clockIn(cookies):
                 f""">>> 限时领券得水滴 {clockInInit["myFollowVenderCouponTimes"]}/3""")
             for i in [i["id"] for i in clockInInit["venderCoupons"] if not i["hadGot"] and i["hadStock"]]:
                 print(f"""领券id [{i}]""")
-                print(i)
                 time.sleep(0.5)
                 postTemplate(cookies, "clockInFollowForFarm",
                              {"id": i, "type": "venderCoupon", "step": 1})
@@ -224,9 +309,20 @@ def clockIn(cookies):
 def turnTable(cookies):
     print("\n【天天抽奖】")
     result = getTemplate(cookies, "initForTurntableFarm", {})
-    if not result["timingGotStatus"] and result["sysTime"]-result["timingLastSysTime"] > 14400000:  # 领取定时奖励
-        print('[定时奖励] ', getTemplate(
-            cookies, "timingAwardForTurntableFarm", {}))
+    if "turntableBrowserAds" in result:
+        for i in result["turntableBrowserAds"]:
+            if i["status"]:
+                continue
+            print("浏览广告>>")
+            print(getTemplate(cookies, "browserForTurntableFarm",
+                              {"type": 1, 'adId': i["adId"], }))
+            time.sleep(1)
+            print(getTemplate(cookies, "browserForTurntableFarm",
+                              {"type": 2, 'adId': i["adId"], }))
+    if "timingGotStatus" in result:
+        if not result["timingGotStatus"] and result["sysTime"]-result["timingLastSysTime"] > 14400000:  # 领取定时奖励
+            print('[定时奖励] ', getTemplate(
+                cookies, "timingAwardForTurntableFarm", {}))
     print(
         f"""为我助力: {result["masterHelpTimes"]}/{result["helpedTimesByOther"]}""")
 
@@ -241,13 +337,16 @@ def turnTable(cookies):
 
 
 for cookies in jdCookie.get_cookies():
-    toFlowTimes, toFruitTimes=initFarm(cookies)
+    toFlowTimes, toFruitTimes = initFarm(cookies)
     turnTable(cookies)
     clockIn(cookies)
     _help(cookies, shareCodes)
     totalWaterTaskTimes = takeTask(cookies)
     masterHelp(cookies)
     luck(cookies)
-    water(cookies, totalWaterTaskTimes,toFlowTimes, toFruitTimes)
+    friends(cookies)
+    bag(cookies)
+    water(cookies, totalWaterTaskTimes, toFlowTimes, toFruitTimes)
+
     print("\n")
     print("##"*30)

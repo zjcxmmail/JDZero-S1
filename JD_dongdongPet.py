@@ -8,10 +8,11 @@ import time
 1、从jdCookie.py处填写 cookie
 2、shareCode 为自己的助力码，但是需要别人为自己助力
 3、欢迎留下shareCode互助
-4、feedTimesLimit 自定义的每天喂养最大次数，防止浪费
-
+4、feedTimesLimit 自定义的每天喂养最大次数
+5、retainFoodAmountLimit 完成10次喂养任务的基础上,希望food始终高于此数
 """
-feedTimesLimit = 24
+feedTimesLimit = 12
+retainFoodAmountLimit = 40  # 完成10次喂养任务的基础上,希望food始终高于此数;优先级高于feedTimesLimit
 shareCodes = [
     "MTAxODc2NTEzMTAwMDAwMDAwOTYwNDkzMQ==", "MTAxODcxOTI2NTAwMDAwMDAwMTY0NTc4OQ==", "MTAxODc2NTEzMDAwMDAwMDAyNjYzMDQ3MQ=="
 ]  # 自己不能助力自己,填写他人的助力码
@@ -37,6 +38,11 @@ def feedPets(cookies):
     foodAmount = result["foodAmount"]
     hadFeedTimes = int(functionTemplate(cookies, "taskInit", {})[
         "result"]["feedReachInit"]["hadFeedAmount"]/10)
+    if hadFeedTimes >= 10 and foodAmount < retainFoodAmountLimit+10:
+        print(
+            f"""10次喂养任务完成,保留food {foodAmount} g \n(retainFoodAmountLimit={retainFoodAmountLimit} 限制)""")
+        print("跳出自动喂养")
+        return
     if foodAmount < 10:
         print(" [X]跳过feed, food不足:", foodAmount)
         return
@@ -51,8 +57,15 @@ def feedPets(cookies):
             print("喂养次数限制")
             return
         print(f"自动喂养...[{i}]")
-
-        functionTemplate(cookies, "feedPets", {})
+        # ["result"]["foodAmount"]
+        data = functionTemplate(cookies, "feedPets", {})
+        print(data)
+        foodAmount = data["result"]["foodAmount"]
+        if hadFeedTimes >= 10 and foodAmount < retainFoodAmountLimit+10:
+            print(
+                f"""10次喂养任务完成,保留food {foodAmount} g \n(retainFoodAmountLimit={retainFoodAmountLimit} 限制)""")
+            print("跳出自动喂养")
+            return
         time.sleep(3)
         n -= 1
 
@@ -167,7 +180,6 @@ def takeTask(cookies):
 for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
     status = functionTemplate(cookies, "initPetTown", {})["result"]
-    # print(status)
     print("\n【检查状态】")
     print(f"""兑换奖品: {status["goodsInfo"]["goodsName"]}""")
     print(

@@ -7,9 +7,11 @@ import re
 """
 jd取消关注店铺、商品  参考自 @uniqueque (https://github.com/uniqueque/QuantumultX/blob/master/Script/jd_unfollow.js)
 当关注达到上限时，某些活动会提示火爆
-某些情况下会显示错误，实际没有影响
+
 """
 NUM = 50  # 执行一次，取消关注的数量
+unfollowdShopsFlag = 1  # 取关店铺,停用置为0
+unfollowdGoodsFlag = 1  # 取关商品,停用置为0
 
 
 def unfollowdShops(cookies):
@@ -92,6 +94,8 @@ print("尽量不要一次性全部取消，以免被风控")
 for cookies in jdCookie.get_cookies():
     print("\n")
     print(f"""[ {cookies["pt_pin"]} ]""")
-    unfollowdShops(cookies)
-    unfollowdGoods(cookies)
+    if unfollowdShopsFlag == 1:
+        unfollowdShops(cookies)
+    if unfollowdGoodsFlag == 1:
+        unfollowdGoods(cookies)
     print("##"*25)

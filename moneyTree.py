@@ -117,6 +117,7 @@ def dayWork(cookies, userInfo):
             }
             response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/setUserLinkStatus?_{int(time.time()*1000)}', headers=headers,
                                      cookies=cookies, data=data)
+            time.sleep(2)
             print(response.text)
         time.sleep(1)
 

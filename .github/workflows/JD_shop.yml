@@ -22,5 +22,6 @@ jobs:
         run: python3 JD_shop.py 
         env:
             JD_COOKIE: ${{ secrets.JD_COOKIE }}
+            SCKEY: ${{ secrets.SCKEY }}
 
     

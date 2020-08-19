@@ -3,28 +3,29 @@ import json
 import time
 import os
 import re
+import notification
 
 """
 1、抓包，登录 https://bean.m.jd.com 点击签到并且出现签到日历后
 2、返回抓包，搜索关键词 functionId=signBean 复制Cookie中的pt_key与pt_pin
 3、注意，cookies会过期,大约为一个月
 4、python3.6+ 环境，需要requests包
-
 集中cookie管理
 多账号准备
 过期检查
+需要推送通知的，修改notification.py
 """
-smtp = 0   # smtp服务,需要的置为1,并修改easyMail.py
+
 ###############################
-# 方案1 本地执行  下载到本地，填写参数，执行
-cookies1={
-'pt_key': '',    #cookie参数填写，填写完注意不要上传
-'pt_pin': '',
+# 方案1 本地执行、云服务器、云函数等等   下载到本地，填写参数，执行
+cookies1 = {
+    'pt_key': '',  # cookie参数填写，填写完注意不要上传
+    'pt_pin': '',
 }
 
-cookies2={}   # 如果有其它账号，还需要将cookies2填写进 下面的cookieLists
+cookies2 = {}   # 如果有其它账号，还需要将cookies2填写进 下面的cookieLists
 
-cookiesLists=[cookies1,]  #多账号准备
+cookiesLists = [cookies1, ]  # 多账号准备
 
 
 ####################################
@@ -42,6 +43,7 @@ if "JD_COOKIE" in os.environ:
         cookiesLists.append({"pt_pin": pt_pin, "pt_key": pt_key})
 
 #######################################
+
 
 def valid(cookies):
     headers = {
@@ -62,18 +64,16 @@ def valid(cookies):
                             headers=headers, params=params, cookies=cookies)
     if response.json()["code"] == "3":
         print(f"""## {cookies["pt_pin"]}: cookie过期""")
-        if smtp == 1:
-            import easyMail
-            easyMail.send_email(
-                "JD_tools脚本通知", f"""## 账号【{cookies["pt_pin"]}】 cookie过期 ，及时修改""")
+        notification.notify(
+            "JD_tools脚本通知", f"""## 账号【{cookies["pt_pin"]}】 cookie过期 ，及时修改""")
         return False
     return True
+
 
 def get_cookies():
     return [i for i in cookiesLists if valid(i)]
 
 
-# get_cookies()
 print("***"*20)
 print("***"*20)
 print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))

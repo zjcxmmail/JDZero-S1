@@ -2,7 +2,7 @@ import jdCookie
 import json
 import requests
 import time
-import easyMail
+import notification
 """
 1、从jdCookie.py处填写 cookie
 2、shareCode 为自己的助力码，但是需要别人为自己助力
@@ -324,8 +324,7 @@ for cookies in jdCookie.get_cookies():
         continue
     if treeState in [2, 3]:
         print("可以兑换了")
-        if jdCookie.smtp == 1:
-            easyMail.send_email(
+        notification.notify(
                 "JD_tools脚本通知", f"""## 东东农场 账号【{cookies["pt_pin"]}】 可以兑换了""")
         continue
     nickName = result["farmUserPro"]["nickName"]

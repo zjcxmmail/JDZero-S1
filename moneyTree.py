@@ -93,12 +93,14 @@ def dayWork(cookies, userInfo):
         if i["workType"] == 1:  # 三餐签到
             print("【三餐签到】")
             if i["workStatus"] == 0:
+                time.sleep(2)
                 sign(cookies, userInfo)
             if i["workStatus"] == 2:
                 print("ok")
         if i["workType"] == 2:  # 每日分享
             print("【分享】")
             if i["workStatus"] == 0:
+                time.sleep(2)
                 share(cookies, userInfo)
             if i["workStatus"] == 2:
                 print("ok")
@@ -109,17 +111,17 @@ def dayWork(cookies, userInfo):
             continue
         if i['workStatus'] == 1:
             print("receiveAward")
+            time.sleep(2)
             receiveAward(cookies, i["mid"])
             continue
         for j in range(7):
+            time.sleep(2)
             data = {
                 'reqData': f"""{{"missionId":{i["mid"]},"pushStatus":1,"keyValue":{j},"riskDeviceParam":"{{\\"eid\\":\\"\\",\\"dt\\":\\"\\",\\"ma\\":\\"\\",\\"im\\":\\"\\",\\"os\\":\\"\\",\\"osv\\":\\"\\",\\"ip\\":\\"\\",\\"apid\\":\\"jdapp\\",\\"ia\\":\\"\\",\\"uu\\":\\"\\",\\"cv\\":\\"\\",\\"nt\\":\\"WIFI\\",\\"at\\":\\"1\\",\\"fp\\":\\"\\",\\"token\\":\\"\\"}}"}}"""
             }
             response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/setUserLinkStatus?_{int(time.time()*1000)}', headers=headers,
                                      cookies=cookies, data=data)
-            time.sleep(2)
             print(response.text)
-        time.sleep(1)
 
 
 def receiveAward(cookies, mid):
@@ -145,14 +147,25 @@ def signOne(cookies):
     if "awardStatus" in data:
         if data["awardStatus"] == 1:
             print("连续签到奖励")
+            time.sleep(2)
             body = {'reqData': json.dumps(
                 {"source": 2, "awardType": 2})}
             response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/getSignAward?_{int(time.time()*1000)}', headers=headers,
                                      cookies=cookies, data=body)
             print(response.text)
-            print("暂未签到")
+            time.sleep(2)
+            code = response.json()["resultData"]["data"]["code"]
+
+            if code == -3:  # 库存不足
+                time.sleep(2)
+                body = {'reqData': json.dumps(
+                    {"source": 2, "awardType": 4})}
+                response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/getSignAward?_{int(time.time()*1000)}', headers=headers,
+                                         cookies=cookies, data=body)
+                print(response.text)
             return
     if data["canSign"] == 2:
+        time.sleep(2)
         body = {'reqData': json.dumps(
             {"source": 2, "signDay": data["signDay"]})}
         response = requests.post(f'https://ms.jr.jd.com/gw/generic/uc/h5/m/signOne?_{int(time.time()*1000)}', headers=headers,
@@ -163,7 +176,7 @@ def signOne(cookies):
         print("ok")
 
 
-for cookies in jdCookie.get_cookies()[::2]:
+for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
     signOne(cookies)
     userInfo = user_info(cookies)

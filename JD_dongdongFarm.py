@@ -2,7 +2,7 @@ import jdCookie
 import json
 import requests
 import time
-
+import easyMail
 """
 1、从jdCookie.py处填写 cookie
 2、shareCode 为自己的助力码，但是需要别人为自己助力
@@ -12,7 +12,7 @@ import time
 6、水滴高于100时,默认使用翻倍卡;其他情况不使用道具
 
 """
-waterTimesLimit = 25  # 自定义的每天浇水最大次数
+waterTimesLimit = 26  # 自定义的每天浇水最大次数
 retainWaterLimit = 100  # 完成10次浇水任务的基础上,希望水滴始终高于此数
 waterFriendLimit = 3  # [0,3]   0: 始终不替他人浇水   3: 替他人浇水3次以完成任务获得40水
 
@@ -65,26 +65,6 @@ def luck(cookies):
         print("addEnergy ", result["addEnergy"])
     if result["code"] == "7":
         print("暂无")
-
-
-def initFarm(cookies):
-    if shareCodes:
-        postTemplate(cookies, 'initForFarm', {"inviteCode": shareCodes[0]})
-    result = postTemplate(cookies, 'initForFarm', {"version": 4})
-    # print(result)
-    toFlowTimes = result["toFlowTimes"]
-    toFruitTimes = result["toFruitTimes"]
-    nickName = result["farmUserPro"]["nickName"]
-    myshareCode = result["farmUserPro"]["shareCode"]
-    treeEnergy = result["farmUserPro"]["treeEnergy"]
-    lastTimes = int((result["farmUserPro"]["treeTotalEnergy"]-treeEnergy)/10)
-    print(f"""\n\n[ {nickName} ]\n{result["farmUserPro"]["name"]}""")
-    print(f"""我的助力码: {myshareCode}""")
-    print(
-        f"""treeEnergy: {treeEnergy}/{result["farmUserPro"]["treeTotalEnergy"]}""")
-    print(
-        f"""预计浇水次数: {lastTimes}""")
-    return toFlowTimes, toFruitTimes
 
 
 def water(cookies, totalWaterTaskTimes, toFlowTimes, toFruitTimes):
@@ -158,16 +138,18 @@ def friends(cookies):
     waterFriendCountKey = postTemplate(cookies, "taskInitForFarm", {})[
         "waterFriendTaskInit"]["waterFriendCountKey"]
     print(f"今日为好友浇水次数:{waterFriendCountKey}")
-    needWater += shareCodes
+    needWater = shareCodes+needWater
     if waterFriendCountKey >= waterFriendLimit:
         print("助力浇水完成\n")
         return
     N = waterFriendLimit - waterFriendCountKey
     for i in needWater:
+        print(i)
         if N == 0:
             return
         data = postTemplate(cookies, "waterFriendForFarm",
                             {"shareCode": i, "version": 4, "channel": 1})
+        print(data)
         if data["code"] == "0":
             N -= 1
         if data["code"] == "11":
@@ -191,7 +173,6 @@ def bag(cookies):
 
 def takeTask(cookies):
     print("\n【任务列表】")
-
     taskList = postTemplate(cookies, "taskInitForFarm", {})
     if "signInit" in taskList:
         _signInit = taskList["signInit"]  # 连续签到
@@ -237,7 +218,6 @@ def takeTask(cookies):
         postTemplate(cookies, "waterRainForFarm", {
             "type": 1, "hongBaoTimes": 100, "version": 3})
     _waterFriendTaskInit = taskList["waterFriendTaskInit"]
-    # print(_waterFriendTaskInit)
     print(
         f"""waterFriend: {_waterFriendTaskInit["waterFriendCountKey"]}/3   {_waterFriendTaskInit["f"]}""")
     if not _waterFriendTaskInit["f"] and _waterFriendTaskInit["waterFriendCountKey"] >= 3:
@@ -337,7 +317,26 @@ def turnTable(cookies):
 
 
 for cookies in jdCookie.get_cookies():
-    toFlowTimes, toFruitTimes = initFarm(cookies)
+    result = postTemplate(cookies, 'initForFarm', {"version": 4})
+    treeState = result["treeState"]
+    if treeState == 0:
+        print("还未开始种植")
+        continue
+    if treeState in [2, 3]:
+        print("可以兑换了")
+        if jdCookie.smtp == 1:
+            easyMail.send_email(
+                "JD_tools脚本通知", f"""## 东东农场 账号【{cookies["pt_pin"]}】 可以兑换了""")
+        continue
+    nickName = result["farmUserPro"]["nickName"]
+    myshareCode = result["farmUserPro"]["shareCode"]
+    treeEnergy = result["farmUserPro"]["treeEnergy"]
+    lastTimes = int((result["farmUserPro"]["treeTotalEnergy"]-treeEnergy)/10)
+    print(f"""\n\n[ {nickName} ]\n{result["farmUserPro"]["name"]}""")
+    print(f"""我的助力码: {myshareCode}""")
+    print(
+        f"""treeEnergy: {treeEnergy}/{result["farmUserPro"]["treeTotalEnergy"]}""")
+    print(f"""预计浇水次数: {lastTimes}""")
     turnTable(cookies)
     clockIn(cookies)
     _help(cookies, shareCodes)
@@ -346,7 +345,7 @@ for cookies in jdCookie.get_cookies():
     luck(cookies)
     friends(cookies)
     bag(cookies)
-    water(cookies, totalWaterTaskTimes, toFlowTimes, toFruitTimes)
-
+    water(cookies, totalWaterTaskTimes,
+          result["toFlowTimes"], result["toFruitTimes"])
     print("\n")
     print("##"*30)

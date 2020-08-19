@@ -14,6 +14,7 @@ import re
 多账号准备
 过期检查
 """
+smtp = 0   # smtp服务,需要的置为1,并修改easyMail.py
 ###############################
 # 方案1 本地执行  下载到本地，填写参数，执行
 cookies1={
@@ -61,6 +62,10 @@ def valid(cookies):
                             headers=headers, params=params, cookies=cookies)
     if response.json()["code"] == "3":
         print(f"""## {cookies["pt_pin"]}: cookie过期""")
+        if smtp == 1:
+            import easyMail
+            easyMail.send_email(
+                "JD_tools脚本通知", f"""## 账号【{cookies["pt_pin"]}】 cookie过期 ，及时修改""")
         return False
     return True
 

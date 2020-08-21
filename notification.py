@@ -2,7 +2,6 @@ import requests
 import os
 import smtplib
 from email.mime.text import MIMEText
-from email.header import Header
 import time
 
 
@@ -18,7 +17,7 @@ email_dict = {
     "passWord": '',               # ② passWord是服务器授权码
     "mail_host": 'smtp.qq.com',   # ③ mail_host是服务器地址（这里是QQsmtp服务器）
     "port": 465,                  # ④ QQsmtp服务器的端口号为465或587
-    "receivers": ['']             # ⑤ receivers是邮件接收人，用列表保存，可以添加多个
+    "receiver": ''                # ⑤ receiver是邮件接收人
 }
 ##################################################################
 
@@ -39,17 +38,17 @@ def send_email(subject, msg_content):
     mail_user = email_dict["sender"]
     mail_pass = email_dict["passWord"]
     sender = mail_user
-    receivers = email_dict["receivers"]
+    receiver = email_dict["receiver"]
     message = MIMEText(msg_content, 'plain', 'utf-8')
-    message['From'] = Header("JD_tools Scripts", 'utf-8')
-    message['To'] = Header("User", 'utf-8')
-    message['Subject'] = Header(subject, 'utf-8')
+    message['From'] = sender
+    message['To'] = receiver
+    message['Subject'] = subject
     try:
         smtpObj = smtplib.SMTP_SSL(mail_host, email_dict["port"])  # ssl加密
         # smtpObj = smtplib.SMTP(mail_host, 25)                    # 明文发送
         smtpObj.login(mail_user, mail_pass)
         print("邮件登录成功")
-        smtpObj.sendmail(sender, receivers, message.as_string())
+        smtpObj.sendmail(sender, receiver, message.as_string())
         smtpObj.quit()
         print("邮件发送成功")
     except smtplib.SMTPException as e:

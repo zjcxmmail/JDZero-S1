@@ -65,7 +65,7 @@ def valid(cookies):
     if response.json()["code"] == "3":
         print(f"""## {cookies["pt_pin"]}: cookie过期""")
         notification.notify(
-            "JD_tools脚本通知", f"""## 账号【{cookies["pt_pin"]}】 cookie过期 ，及时修改""")
+            f"""## 京东账号【{cookies["pt_pin"]}】 cookie过期""", f"""## 账号【{cookies["pt_pin"]}】 cookie过期 ，及时修改""")
         return False
     return True
 

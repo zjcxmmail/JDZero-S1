@@ -325,7 +325,7 @@ for cookies in jdCookie.get_cookies():
     if treeState in [2, 3]:
         print("可以兑换了")
         notification.notify(
-                "JD_tools脚本通知", f"""## 东东农场 账号【{cookies["pt_pin"]}】 可以兑换了""")
+               f"""##东东农场可兑换【{cookies["pt_pin"]}】""", f"""## 东东农场 账号【{cookies["pt_pin"]}】 可以兑换了""")
         continue
     nickName = result["farmUserPro"]["nickName"]
     myshareCode = result["farmUserPro"]["shareCode"]

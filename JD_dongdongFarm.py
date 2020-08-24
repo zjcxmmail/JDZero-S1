@@ -130,6 +130,10 @@ def friends(cookies):
     data = postTemplate(cookies, "friendListInitForFarm",
                         {"version": 4, "channel": 1})
     print(f"""今日邀请 {data["inviteFriendCount"]}/10""")
+    if data["inviteFriendCount"] > 0 and data["inviteFriendCount"] > data["inviteFriendGotAwardCount"]:
+        print("领取邀请奖励")   
+        print(postTemplate(cookies, "awardInviteFriendForFarm", {}))
+        # TODO 满三次获得道具卡未实现
     if waterFriendLimit == 0:
         print("始终不为好友浇水\n跳过")
         return
@@ -325,7 +329,7 @@ for cookies in jdCookie.get_cookies():
     if treeState in [2, 3]:
         print("可以兑换了")
         notification.notify(
-               f"""##东东农场可兑换【{cookies["pt_pin"]}】""", f"""## 东东农场 账号【{cookies["pt_pin"]}】 可以兑换了""")
+            f"""东东农场可兑换【{cookies["pt_pin"]}】""", f"""东东农场 账号【{cookies["pt_pin"]}】 可以兑换了""")
         continue
     nickName = result["farmUserPro"]["nickName"]
     myshareCode = result["farmUserPro"]["shareCode"]

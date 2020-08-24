@@ -45,7 +45,8 @@ actions 查看对应的workflow
 cron 0 0 * * *   #此处表示在国际标准时间0点（北京时间+8，即早上8点）运行
 ```
 
-此外，GitHub action的分钟有误差，目前具体未知，大概延迟5分钟（即以上表达式大约在8:05左右运行），请自行调整
+注意：计划的action最多可能会延迟15分钟。这样做是为了在繁忙时间（例如，UTC上午12:00）保持可靠性。预定的工作流程不应假定它们以最新的准确性启动。
+
 
 ## 参考
 http://www.ruanyifeng.com/blog/2019/09/getting-started-with-github-actions.html

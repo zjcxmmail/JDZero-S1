@@ -306,10 +306,13 @@ def queryPrize(cookies):
         for i in range(tt["targetNum"]-tt["finishNum"]):
             data = getTemplate(cookies, "smtg_obtainPrize",
                                {"prizeId": tt["prizeId"]})["data"]
-            print(data["result"])
+            # print(data)
+            if data["bizCode"] == 507:
+                print("[万能的京豆] 个人兑换次数限制")
+                return
             time.sleep(1)
             if data["result"]["exchangeNum"] == tt["targetNum"] or data["result"]["blue"] < tt["blueCost"]:
-                print("无法兑换")
+                print("[万能的京豆] 无法兑换")
                 return
 
 

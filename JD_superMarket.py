@@ -4,19 +4,34 @@ import requests
 import time
 
 """
-京小超
-1.日常任务
-2.领小费 蓝币
-3.领金币
-cron 5 * * * *
+京小超 cron 5 * * * * 
+
+1.日常任务、商圈pk任务
+2.自动领取金币、蓝币小费
+3.货架与商品的解锁、上架、升级
+4.优先上架限时商品和领取限时商品的蓝币奖励
+5.自动兑换京豆奖励
 
 金币使用顺序:
 1、解锁货架
 2、检查货架可上架的产品(优先上架限时商品)
-    若无,解锁一个对应类型的商品
-3、不升级货架和商品
+     若无,解锁一个对应类型的商品
+     
 
+金币使用顺序(额外):
+1.解锁、升级商品(跳过低级商品)
+2.升级货架
+
+TODO:
+优先安排生产
 """
+# 参数设置,开启置1,关闭置0
+flag_prize_1000 = 1  # 京豆打包兑换(优先)
+flag_prize_1 = 1  # 单个京豆兑换
+flag_upgrade = 1  # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
+
+# 商圈助力码
+inviteCodes = ["IhM_beyxYPwg82i6iw", "YF5-KbvnOA", "eU9YaLm0bq4i-TrUzSUUhA"]
 
 
 def getTemplate(cookies, functionId, body):
@@ -40,7 +55,31 @@ def getTemplate(cookies, functionId, body):
     return response.json()
 
 
+def postTemplate(cookies, functionId, body):
+    headers = {
+        'User-Agent': 'jdapp;iPhone;9.0.8;13.6;Mozilla/5.0 (iPhone; CPU iPhone OS 13_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
+        'Host': 'api.m.jd.com',
+        'Referer': 'https://jdsupermarket.jd.com/game',
+        'Origin': 'https://jdsupermarket.jd.com',
+    }
+
+    params = (
+        ('appid', 'jdsupermarket'),
+        ('functionId', functionId),
+        ('clientVersion', '8.0.0'),
+        ('client', 'm'),
+        ('body', json.dumps(body)),
+    )
+
+    response = requests.get('https://api.m.jd.com/api',
+                            headers=headers, params=params, cookies=cookies)
+    return response.json()
+
+
 def receiveBlue(cookies):
+    print("\n【限时商品蓝币领取】")
+    data = getTemplate(cookies, "smtg_receiveCoin", {"type": 1})["data"]
+    print(data["bizMsg"])
     print("\n【领取小费】")
     for _ in range(10):
         data = getTemplate(cookies, "smtg_receiveCoin", {"type": 2})["data"]
@@ -60,6 +99,34 @@ def receiveCoin(cookies):
         return
     print(
         f"""totalGold:{data["result"]["totalGold"]}(+{data["result"]["receivedGold"]})""")
+
+
+def upgrade(cookies):
+    if flag_upgrade == 0:
+        return
+    print(">>>检查升级商品")
+    data = getTemplate(cookies, "smtg_productList", {})[
+        "data"]["result"]["productList"]
+    productList = [i for i in data if i["productType"] == 1]
+    shelfCategory_1 = [i for i in productList if i["shelfCategory"] == 1][-3:]
+    shelfCategory_2 = [i for i in productList if i["shelfCategory"] == 2][-3:]
+    shelfCategory_3 = [i for i in productList if i["shelfCategory"] == 3][-2:]
+
+    for i in shelfCategory_1+shelfCategory_2+shelfCategory_3:
+        if i["unlockStatus"] == 1:
+            unlockproduct(cookies, i["productId"])
+            return
+        if i["upgradeStatus"] == 1:
+            upgradeproduct(cookies, i["productId"])
+            return
+    print(">>>检查升级货架")
+    shelfList = getTemplate(cookies, "smtg_shelfList", {})[
+        "data"]["result"]["shelfList"]
+    shelfList_upgrade = [i for i in shelfList if i["upgradeStatus"] == 1]
+    if len(shelfList_upgrade) == 0:
+        return
+    tt = sorted(shelfList_upgrade, key=lambda keys: keys['upgradeCostGold'])
+    upgradeShelf(cookies, tt[0]["shelfId"])
 
 
 def shelfList(cookies):
@@ -107,16 +174,14 @@ def productList(cookies):
         if i["productType"] == 2:
             print("限时商品")
             continue
-        print(f"""unlockStatus:{i["unlockStatus"]}""")
-        print(f"""upgradeStatus:{i["upgradeStatus"]}""")
-        print(f"""priceGold:{i["priceGold"]}""")
 
 
 def currentGold(cookies):
     """
     当前金币
     """
-    return getTemplate(cookies, "smtg_home", {})["data"]["result"]["totalGold"]
+    result = getTemplate(cookies, "smtg_home", {})["data"]["result"]
+    return result["totalGold"], result["totalBlue"]
 
 
 def dailyTask(cookies):
@@ -211,32 +276,88 @@ def shelfProductList(cookies, shelfId):
     return
 
 
-def obtainPrize(cookies, prizeId):
-    """
-    蓝币兑奖，自行调用
-    """
-    headers = {
-        'User-Agent': 'jdapp;iPhone;9.0.8;13.6;Mozilla/5.0 (iPhone; CPU iPhone OS 13_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
-        'Host': 'api.m.jd.com',
-        'Referer': 'https://jdsupermarket.jd.com/game',
-        'Origin': 'https://jdsupermarket.jd.com',
-    }
-    params = (
-        ('appid', 'jdsupermarket'),
-        ('functionId', 'smtg_obtainPrize'),
-        ('clientVersion', '8.0.0'),
-        ('client', 'm'),
-        ('body', json.dumps({"prizeId": prizeId})),
-    )
+def queryPrize(cookies):
+    if not flag_prize_1 and not flag_prize_1000:
+        return
+    print("\n【兑换京豆查询】")
+    _, totalBlue = currentGold(cookies)
+    prizeList = getTemplate(cookies, "smtg_queryPrize", {})[
+        "data"]["result"]["prizeList"]
+    t = [i for i in prizeList if i["type"] == 3]
+    if flag_prize_1000 == 1:
+        tt = t[1]
+        if tt["targetNum"] == tt["finishNum"]:
+            print("[京豆大礼包]今日兑换完成")
+            return
+        if tt["blueCost"] <= totalBlue:
+            print(getTemplate(cookies, "smtg_obtainPrize",
+                              {"prizeId": tt["prizeId"]}))
+        else:
+            print("[京豆大礼包] Blue不足")
+    if flag_prize_1 == 1:
+        tt = t[0]
+        if tt["targetNum"] == tt["finishNum"]:
+            print("[万能的京豆]今日兑换完成")
+            return
+        if totalBlue < tt["blueCost"]:
+            print("[万能的京豆] Blue不足")
+            return
 
-    response = requests.post('https://api.m.jd.com/api', headers=headers,
-                             params=params, cookies=cookies)
-    print(response.text)
+        for i in range(tt["targetNum"]-tt["finishNum"]):
+            data = getTemplate(cookies, "smtg_obtainPrize",
+                               {"prizeId": tt["prizeId"]})["data"]
+            print(data["result"])
+            time.sleep(1)
+            if data["result"]["exchangeNum"] == tt["targetNum"] or data["result"]["blue"] < tt["blueCost"]:
+                print("无法兑换")
+                return
+
+
+def businessCircle(cookies):
+    data = getTemplate(cookies, "smtg_businessCirclePKDetail", {})[
+        "data"]
+    if data["bizCode"] != 0:
+        print(data["bizMsg"])
+        if data["bizCode"] == 206:
+            print(getTemplate(cookies, "smtg_joinBusinessCircle", {
+                  "circleId": "IhM_beyxYPwg82i6iw_1598314711414"}))
+        return
+    print("\n【我的商圈】")
+    # print(getTemplate(cookies, "smtg_quitBusinessCircle", {}))
+    result = data["result"]
+    print(f"""inviteCode:{result["inviteCode"]}""")
+    BusinessCircleVO = result["businessCircleVO"]
+    # print(f"""circleId:{BusinessCircleVO["circleId"]}""")
+    otherBusinessCircleVO = result["otherBusinessCircleVO"]
+    print(
+        f"""memberCount(对方/我方): {otherBusinessCircleVO["memberCount"]}/{BusinessCircleVO["memberCount"]}""")
+    print(
+        f"""hotPoint(对方/我方): {otherBusinessCircleVO["hotPoint"]}/{BusinessCircleVO["hotPoint"]}""")
+    result = getTemplate(cookies, "smtg_queryPkTask", {})["data"]["result"]
+    print(f'我的贡献:{result["self"]["current"]}/{result["self"]["target"]}')
+    for i in inviteCodes:
+        getTemplate(cookies, "smtg_doAssistPkTask", {"inviteCode": i})
+    for i in result["taskList"]:
+        if i["prizeStatus"] == 1:
+            print(getTemplate(cookies, "smtg_obtainPkTaskPrize",
+                              {"taskId": i["taskId"]}))
+        if i["taskStatus"] == 1:
+            continue
+        if i["assignmentType"] != 0:
+            for j in range(10):
+                if str(j) in i["content"]:
+                    print(postTemplate(cookies, "smtg_doPkTask",
+                                       {"taskId": i["taskId"], "itemId": i["content"][str(j)]["itemId"]}))
+                    break
+        print("\n")
 
 
 for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
+    queryPrize(cookies)
+    businessCircle(cookies)
     shelfList(cookies)
+    upgrade(cookies)
     sign(cookies)
     dailyTask(cookies)
     receiveCoin(cookies)

@@ -10,6 +10,8 @@
 
 3. 将其命名为`JD_COOKIE`
 
+4. 可能需要提交一次修改才会启动workflow (很多人反馈fork后没有自动运行，原因可能在此)
+
    ![Snipaste_2020-08-13_20-09-30](p/Snipaste_2020-08-13_20-09-30.png)
 
 请严格按照以下格式填写，以免[jdCookie.py](https://github.com/Zero-S1/JD_tools/blob/master/jdCookie.py)识别不了；多个账号换行

@@ -15,6 +15,11 @@ import time
 
 FEED_NUM = 10   # [10,20,40,80]
 
+import jdCookie
+import json
+import requests
+import time
+
 headers = {
     'Content-Type': 'application/json',
     'reqSource': 'weapp',
@@ -61,6 +66,7 @@ def enterRoom(cookies):
     进入房间；喂养后刷新
     """
     data = getTemplate(cookies, "enterRoom", ())["data"]
+    # print(data)
     petFood = data["petFood"]
     feedCount = data["feedCount"]
     petLevel = data["petLevel"]
@@ -99,17 +105,16 @@ def takeTask(cookies):
 
         if i["receiveStatus"] == "chance_full":
             continue
+        if i["receiveStatus"] == "unreceive":
+            print(getTemplate(cookies, "getFood",
+                              (('taskType', i["taskType"]),)))
 
         if i["taskType"] == "SignEveryDay":  # 每日签到
             if i["receiveStatus"] == "chance_left":
                 print("     >>>>>需要手动签到")
-            if i["receiveStatus"] == "unreceive":
-                print(getTemplate(cookies, "getFood",
-                                  (('taskType', 'SignEveryDay'),)))
+                # print(getTemplate(cookies, "sign", (('taskType', 'SignEveryDay'),)))
 
         if i["taskType"] == "FollowShop":  # 关注店铺
-            # print(i)
-            # exit()
             shopIDs = [j["shopId"]
                        for j in i["followShops"] if not j["status"]]
             print(shopIDs)
@@ -198,6 +203,7 @@ def desk(cookies):
     response = requests.get('https://jdjoy.jd.com/pet/getDeskGoodDetails',
                             headers=headers_app, cookies=cookies)
     result = response.json()
+    # print(result)
     deskGoods = result["data"]["deskGoods"]
     if not deskGoods:
         print("活动下线")
@@ -210,7 +216,6 @@ def desk(cookies):
     tt = [i["sku"]
           for i in deskGoods if not i["status"]][:(taskChance-followCount)]
     if len(tt) == 0:
-        # print("ok")
         return
     for i in tt:
         data = f"""{{"taskType":"ScanDeskGood","reqSource":"h5","sku":"{i}"}}"""
@@ -220,16 +225,37 @@ def desk(cookies):
         time.sleep(1)
 
 
+def reward(cookies):
+    response = requests.get('https://jdjoy.jd.com/gift/getHomeInfo',
+                            headers=headers_app, cookies=cookies)
+    result = response.json()
+    print(result)
+    giftSaleInfos = result["data"]["levelSaleInfos"]["giftSaleInfos"]
+    jd_bean = [i for i in giftSaleInfos if i["giftType"] == "jd_bean"]
+    if not jd_bean:
+        return
+    jd_bean = jd_bean[0]
+    if not jd_bean["leftStock"]:
+        print("库存不足")
+        return
+    data = {
+        "orderSource": "pet", "saleInfoId": jd_bean["id"]
+    }
+    response = requests.post('https://jdjoy.jd.com/gift/exchange',
+                             headers=headers_app, data=json.dumps(data), cookies=cookies)
+    print(response.text)
+
+
 for cookies in jdCookie.get_cookies():
     feed(cookies, FEED_NUM)
+    
 
 for cookies in jdCookie.get_cookies():
     print("\n")
-    # print(f"""[ {cookies["pt_pin"]} ]""")
-    # feed(cookies, FEED_NUM)
+    print(f"""[ {cookies["pt_pin"]} ]""")
     takeTask(cookies)
+    reward(cookies)
     ScanMarket_extra(cookies)
     enterRoom(cookies)
     desk(cookies)
     print("##"*25)
-

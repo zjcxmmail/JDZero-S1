@@ -8,18 +8,15 @@ import time
 宠汪汪
 1、从jdCookie.py处填写 cookie
 2、FEED_NUM :自定义 每次喂养数量; 等级只和喂养次数有关，与数量无关
-[x]3、推荐每次投喂10个，积累狗粮，然后去聚宝盆赌每小时的幸运奖，据观察，投入3000-6000中奖概率大，超过7000基本上注定亏本，即使是第一名
 3、聚宝盆玩法 具体可参考 [关于宠汪汪聚宝盆.md]
 4、cron 0 */3 * * *  JD_chongWangWang.py  #每隔三小时运行一次，加快升级
 5、自动兑换京豆
+6、佛系参加双人比赛、领取奖励
 """
 
 FEED_NUM = 10   # [10,20,40,80]
-
-import jdCookie
-import json
-import requests
-import time
+combat_flag = 1  #自动参赛，取消置0
+teamLevel = 2  # 双人赛据说不需要门票
 
 headers = {
     'Content-Type': 'application/json',
@@ -230,7 +227,6 @@ def reward(cookies):
     response = requests.get('https://jdjoy.jd.com/gift/getHomeInfo',
                             headers=headers_app, cookies=cookies)
     result = response.json()
-    print(result)
     giftSaleInfos = result["data"]["levelSaleInfos"]["giftSaleInfos"]
     jd_bean = [i for i in giftSaleInfos if i["giftType"] == "jd_bean"]
     if not jd_bean:
@@ -245,7 +241,51 @@ def reward(cookies):
     response = requests.post('https://jdjoy.jd.com/gift/exchange',
                              headers=headers_app, data=json.dumps(data), cookies=cookies)
     print(response.text)
+    
+def combat(cookies):
+    if combat_flag == 0:
+        return
+    print("\n【宠物赛跑】")
+    data = getTemplate(
+        cookies, "combat/detail/v2", (("help", "false"),))["data"]
+    # print(data)
+    petRaceResult = data["petRaceResult"]
+    print(petRaceResult)
+    if petRaceResult == "unbegin":
+        print("比赛还未开始")
+        return
+    if petRaceResult == "time_over":
+        print("比赛已结束，明早9点再来哦")
+        return
+    if petRaceResult == "unreceive":
+        print("领取奖励")
+        response = requests.get(f'https://jdjoy.jd.com/pet/combat/receive',
+                                headers=headers, cookies=cookies)
+        print(response.text)
+        return
+    if petRaceResult == "participate":
+        print("===比赛排行榜===")
 
+        def f(status):
+            if status:
+                return "(myself)"
+            return " "
+        for i in data["raceUsers"]:
+            print(
+                f"""{i["rank"]} --- {i["distance"]} -- {i["nickName"]}    {f(i["myself"])} """)
+        result = requests.get(f'https://jdjoy.jd.com/pet/combat/getBackupInfo',
+                              headers=headers, cookies=cookies).json()["data"]
+        print("\n===应援团===")
+        backupList = result["backupList"]
+        if backupList:
+            ii = [i["nickName"] for i in backupList]
+            print(ii)
+    if petRaceResult == "not_participate":
+        print("准备参赛")
+        data = requests.get(f'https://jdjoy.jd.com/pet/combat/match?teamLevel={teamLevel}',
+                            headers=headers, cookies=cookies)
+        print(data.text)
+        time.sleep(5)  # 5秒延迟，多账号可能匹配到自己
 
 for cookies in jdCookie.get_cookies():
     feed(cookies, FEED_NUM)
@@ -259,4 +299,5 @@ for cookies in jdCookie.get_cookies():
     ScanMarket_extra(cookies)
     enterRoom(cookies)
     desk(cookies)
+    combat(cookies)
     print("##"*25)

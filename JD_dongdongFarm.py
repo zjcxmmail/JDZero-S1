@@ -12,9 +12,9 @@ import notification
 6、水滴高于100时,默认使用翻倍卡;其他情况不使用道具
 
 """
-waterTimesLimit = 26  # 自定义的每天浇水最大次数
+waterTimesLimit = 40  # 自定义的每天浇水最大次数
 retainWaterLimit = 100  # 完成10次浇水任务的基础上,希望水滴始终高于此数
-waterFriendLimit = 3  # [0,3]   0: 始终不替他人浇水   3: 替他人浇水3次以完成任务获得40水
+waterFriendLimit = 2  # [0,2]   0: 始终不替他人浇水   2: 替他人浇水2次以完成任务获得25水
 
 shareCodes = ["c081c648576e4e61a9697c3981705826",
               "f1d0d5ebda7c48c6b3d262d5574315c7",
@@ -131,9 +131,8 @@ def friends(cookies):
                         {"version": 4, "channel": 1})
     print(f"""今日邀请 {data["inviteFriendCount"]}/10""")
     if data["inviteFriendCount"] > 0 and data["inviteFriendCount"] > data["inviteFriendGotAwardCount"]:
-        print("领取邀请奖励")   
+        print("领取邀请奖励")
         print(postTemplate(cookies, "awardInviteFriendForFarm", {}))
-        # TODO 满三次获得道具卡未实现
     if waterFriendLimit == 0:
         print("始终不为好友浇水\n跳过")
         return
@@ -159,7 +158,6 @@ def friends(cookies):
         if data["code"] == "11":
             print("水滴不够,跳出")
             return
-    # TODO
 
 
 def bag(cookies):
@@ -172,7 +170,7 @@ def bag(cookies):
     print(f"""水滴换豆卡 {beanCard}""")
     print(f"""快速浇水卡 {fastCard}""")
     print(f"""水滴翻倍卡 {doubleCard}""")
-    # postTemplate(cookies, "userMyCardForFarm", {"cardType":"fastCard"})   使用道具卡,TODO
+    # postTemplate(cookies, "userMyCardForFarm", {"cardType":"fastCard"})   使用道具卡
 
 
 def takeTask(cookies):
@@ -223,8 +221,8 @@ def takeTask(cookies):
             "type": 1, "hongBaoTimes": 100, "version": 3})
     _waterFriendTaskInit = taskList["waterFriendTaskInit"]
     print(
-        f"""waterFriend: {_waterFriendTaskInit["waterFriendCountKey"]}/3   {_waterFriendTaskInit["f"]}""")
-    if not _waterFriendTaskInit["f"] and _waterFriendTaskInit["waterFriendCountKey"] >= 3:
+        f"""waterFriend: {_waterFriendTaskInit["waterFriendCountKey"]}/{_waterFriendTaskInit["waterFriendMax"]}   {_waterFriendTaskInit["f"]}""")
+    if not _waterFriendTaskInit["f"] and _waterFriendTaskInit["waterFriendCountKey"] >= _waterFriendTaskInit["waterFriendMax"]:
         print(">>>>帮助好友浇水奖励")
         postTemplate(cookies, "waterFriendGotAwardForFarm",
                      {"version": 4, "channel": 1})
@@ -235,7 +233,7 @@ def _help(cookies, shareCodes):
     for i in shareCodes:
         postTemplate(cookies, "initForFarm", {"shareCode": i})
         postTemplate(cookies, "initForFarm", {
-                     "shareCode": f"{i}-inviteFriend"})
+            "shareCode": f"{i}-inviteFriend"})
 
 
 def masterHelp(cookies):

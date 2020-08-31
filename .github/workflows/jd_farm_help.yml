@@ -1,0 +1,29 @@
+name: jd_farm_help
+
+on:
+  push:
+  schedule:
+    - cron: '23 */6 * * * '
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: 'Set up Python'
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+         
+      - name: 'Install requirements'
+        run: pip install -r ./requirements.txt 
+        
+      - name: 'run jd_farm_help' 
+        run: python3 jd_farm_help.py 
+        env:
+            JD_COOKIE: ${{ secrets.JD_COOKIE }}
+
+      
+  
+     

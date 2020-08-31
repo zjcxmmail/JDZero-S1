@@ -6,7 +6,7 @@ import time
 """
 京小超 cron 5 * * * * 
 
-1.日常任务、商圈pk任务
+1.日常任务、商圈pk任务、领取pk奖励
 2.自动领取金币、蓝币小费
 3.货架与商品的解锁、上架、升级
 4.优先上架限时商品和领取限时商品的蓝币奖励
@@ -28,7 +28,7 @@ TODO:
 # 参数设置,开启置1,关闭置0
 flag_prize_1000 = 1  # 京豆打包兑换(优先)
 flag_prize_1 = 1  # 单个京豆兑换
-flag_upgrade = 1  # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
+flag_upgrade = 0  # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
 
 # 商圈助力码
 inviteCodes = ["IhM_beyxYPwg82i6iw", "YF5-KbvnOA", "eU9YaLm0bq4i-TrUzSUUhA"]
@@ -79,6 +79,7 @@ def postTemplate(cookies, functionId, body):
 def receiveBlue(cookies):
     print("\n【限时商品蓝币领取】")
     data = getTemplate(cookies, "smtg_receiveCoin", {"type": 1})["data"]
+    print(data)
     print(data["bizMsg"])
     print("\n【领取小费】")
     for _ in range(10):
@@ -320,11 +321,21 @@ def businessCircle(cookies):
     data = getTemplate(cookies, "smtg_businessCirclePKDetail", {})[
         "data"]
     if data["bizCode"] != 0:
+        print(data)
         print(data["bizMsg"])
         if data["bizCode"] == 206:
             print(getTemplate(cookies, "smtg_joinBusinessCircle", {
                   "circleId": "IhM_beyxYPwg82i6iw_1598314711414"}))
         return
+    result = getTemplate(cookies, "smtg_businessCircleIndex", {})[
+        "data"]["result"]
+    pkPrizeStatus = result["pkPrizeStatus"]
+    if pkPrizeStatus == 2:
+        print("领取PK奖励")
+        result = getTemplate(cookies, "smtg_getPkPrize", {})["data"]["result"]
+        print(result)
+    # pkStatus = result["pkStatus"]
+    print(f"""pkPrizeStatus:{pkPrizeStatus}\n""")
     print("\n【我的商圈】")
     # print(getTemplate(cookies, "smtg_quitBusinessCircle", {}))
     result = data["result"]

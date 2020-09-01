@@ -2,7 +2,6 @@ import jdCookie
 import json
 import requests
 import time
-# import notification
 
 
 """
@@ -45,7 +44,8 @@ def help(cookies):
         print("领取邀请奖励")
         print(postTemplate(cookies, "awardInviteFriendForFarm", {}))
     print("\n>>>开始为他人助力")
-    myFriendCode = [i["shareCode"] for i in data["friends"]]
+    myFriendCode = [i["shareCode"]
+                    for i in data["friends"] if "shareCode" in i]
     countOfFriend = data["countOfFriend"]
     lastId = [i for i in data["friends"]][-1]["id"]
     print(f"""fullFriend:{data["fullFriend"]}""")  # 好友添加总数有上限

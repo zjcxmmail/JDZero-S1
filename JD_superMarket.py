@@ -108,6 +108,7 @@ def upgrade(cookies):
     print(">>>检查升级商品")
     data = getTemplate(cookies, "smtg_productList", {})[
         "data"]["result"]["productList"]
+
     productList = [i for i in data if i["productType"] == 1]
     shelfCategory_1 = [i for i in productList if i["shelfCategory"] == 1][-3:]
     shelfCategory_2 = [i for i in productList if i["shelfCategory"] == 2][-3:]
@@ -137,6 +138,7 @@ def shelfList(cookies):
         "data"]["result"]["shelfList"]
 
     for i in shelfList:
+        # print(i)
         print(f'shelfId: {i["shelfId"]} ({i["name"]})')
         print(f"""货架等级: {i["level"]}/{i["maxLevel"]}""")
         # print(f"""groundStatus:{i["groundStatus"]}""")  # 1可上架 23已上架 0 不可上架
@@ -263,12 +265,13 @@ def shelfProductList(cookies, shelfId):
     print(f">>>检查货架[{shelfId}]可上架产品")
     productList = getTemplate(cookies, "smtg_shelfProductList", {"shelfId": shelfId})[
         'data']["result"]["productList"]
+
     if not productList:
         print("无可上架产品")
         unlockproductbyCategory(cookies, shelfId.split("-")[-1])
         return
     limitTimeProduct = [i["productId"]
-                        for i in productList if i["productType"] == 2]
+                        for i in productList if i["productType"] == 2]  # 此处限时商品未分配才会出现
     if limitTimeProduct:
         print("优先上架限时产品")
         ground(cookies, limitTimeProduct[0], shelfId)
@@ -317,16 +320,35 @@ def queryPrize(cookies):
                 return
 
 
+def limitTimePro(cookies):
+    data = getTemplate(cookies, "smtg_productList", {})[
+        "data"]["result"]["productList"]
+    productList = [i for i in data if i["productType"]
+                   == 2 and i["groundStatus"] == 1]  # 未上架的限时
+    for i in productList:
+        shelfCategory = i["shelfCategory"]
+        data = getTemplate(cookies, "smtg_shelfList", {})[
+            "data"]["result"]["shelfList"]
+        shelfList = [i["shelfId"] for i in data if i["shelfCategory"]
+                     == shelfCategory and i["groundStatus"] == 2]
+        for j in shelfList:
+            productList = getTemplate(cookies, "smtg_shelfProductList", {"shelfId": j})[
+                'data']["result"]["productList"]
+            productList=[i for i in productList if i["productType"]==1]
+            list2=sorted(productList,key=lambda productList: productList["previewTotalPriceGold"])
+            print(list2[-1])
+
+
 def businessCircle(cookies):
     data = getTemplate(cookies, "smtg_businessCirclePKDetail", {})[
         "data"]
     if data["bizCode"] != 0:
-        print(data)
+        # print(data)
         print(data["bizMsg"])
         if data["bizCode"] == 206:
             print(getTemplate(cookies, "smtg_joinBusinessCircle", {
                   "circleId": "IhM_beyxYPwg82i6iw_1598314711414"}))
-        return
+        # return
     result = getTemplate(cookies, "smtg_businessCircleIndex", {})[
         "data"]["result"]
     pkPrizeStatus = result["pkPrizeStatus"]
@@ -334,7 +356,12 @@ def businessCircle(cookies):
         print("领取PK奖励")
         result = getTemplate(cookies, "smtg_getPkPrize", {})["data"]["result"]
         print(result)
-    # pkStatus = result["pkStatus"]
+        return
+    
+    pkStatus = result["pkStatus"]
+    print("pkStatus: ",pkStatus)
+    if pkStatus==2:
+        return
     print(f"""pkPrizeStatus:{pkPrizeStatus}\n""")
     print("\n【我的商圈】")
     # print(getTemplate(cookies, "smtg_quitBusinessCircle", {}))
@@ -368,6 +395,8 @@ def businessCircle(cookies):
 
 for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
+    # limitTimePro(cookies)
+    # continue
     queryPrize(cookies)
     businessCircle(cookies)
     shelfList(cookies)

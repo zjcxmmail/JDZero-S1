@@ -156,12 +156,7 @@ def takeTask(cookies):
                 print(postTemplate(cookies, "followGood",
                                    {'sku': str(sku)}))   # bug
                 print(postTemplate2(cookies, "followGood", {'sku': str(sku)}))
-
-        if i["taskType"] == "ThreeMeals":  # 每日三餐
-            if i["receiveStatus"] == "unreceive":
-                print(getTemplate(cookies, "getFood",
-                                  (('taskType', 'ThreeMeals'),)))
-
+       
         if i["taskType"] == "PlayWeapp":   # 体验小程序
             appIds = [j["appId"] for j in i["weAppList"] if not j["status"]]
             for appId in appIds:

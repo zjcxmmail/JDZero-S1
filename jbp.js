@@ -29,6 +29,6 @@ for (var i in lastHourWinInfos) {
     sum += lastHourWinInfos[i]["petCoin"]
 }
 lastTurnFood = parseInt(sum / 0.09 * 0.91)
-body['data']['food'] = `${food} (${food - lastTurnFood})`
+body['data']['food'] = `${food} (+${food - lastTurnFood})`
 body = JSON.stringify(body)
 $done({ body })

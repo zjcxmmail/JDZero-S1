@@ -24,7 +24,7 @@ let body = $response.body
 body = JSON.parse(body)
 food = body['data']['food']
 function f(v) {
-    return (v < 0) ? v : `+${v}`
+    return (v < 0) ? v : `+${v}`;
 }
 var sum = 0
 lastHourWinInfos = body["data"]["lastHourWinInfos"]

@@ -3,6 +3,8 @@ name: JD_chongWangWang
 on:
   schedule:
     - cron: '30 * * * * '
+  watch:
+    types: [started]
 jobs:
   build:
     runs-on: ubuntu-latest

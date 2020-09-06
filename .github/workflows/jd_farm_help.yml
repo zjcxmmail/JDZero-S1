@@ -1,9 +1,10 @@
 name: jd_farm_help
 
 on:
-  push:
   schedule:
     - cron: '23 */6 * * * '
+  watch:
+    types: [started]
 jobs:
   build:
     runs-on: ubuntu-latest

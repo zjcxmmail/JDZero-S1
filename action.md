@@ -10,8 +10,8 @@
 
 3. 将其命名为`JD_COOKIE`,需要server酱的添加`SCKEY`
 
-4. 可能需要提交一次修改才会启动workflow (schedule定时运行，很多人反馈fork后没有定时运行，原因可能在此)
-   
+4. 可能需要提交一次修改才会启动workflow (schedule定时运行，很多人反馈fork后没有定时运行，原因可能在此)  
+  
    部分脚本可以通过star手动执行，方便观察是否出错
 
    ![Snipaste_2020-08-13_20-09-30](p/Snipaste_2020-08-13_20-09-30.png)
@@ -53,7 +53,6 @@ cron 0 0 * * *   #此处表示在国际标准时间0点（北京时间+8，即�
 
 
 ## 参考
-http://www.ruanyifeng.com/blog/2019/09/getting-started-with-github-actions.html
-
-[GitHub Actions 手动触发方式进化史](https://p3terx.com/archives/github-actions-manual-trigger.html)
+http://www.ruanyifeng.com/blog/2019/09/getting-started-with-github-actions.html  
+[GitHub Actions 手动触发方式进化史](https://p3terx.com/archives/github-actions-manual-trigger.html)    
 [GitHub Actions 入门教程](https://p3terx.com/archives/github-actions-started-tutorial.html)

@@ -8,13 +8,15 @@
 
 2. Settings - Secrets    填写cookie信息，此处专用于保存私密信息
 
-3. 将其命名为`JD_COOKIE`
+3. 将其命名为`JD_COOKIE`,需要server酱的添加`SCKEY`
 
-4. 可能需要提交一次修改才会启动workflow (很多人反馈fork后没有自动运行，原因可能在此)
+4. 可能需要提交一次修改才会启动workflow (schedule定时运行，很多人反馈fork后没有定时运行，原因可能在此)
+   
+   部分脚本可以通过star手动执行，方便观察是否出错
 
    ![Snipaste_2020-08-13_20-09-30](p/Snipaste_2020-08-13_20-09-30.png)
 
-请严格按照以下格式填写，以免[jdCookie.py](https://github.com/Zero-S1/JD_tools/blob/master/jdCookie.py)识别不了；多个账号换行
+`JD_COOKIE`请严格按照以下格式填写，以免[jdCookie.py](https://github.com/Zero-S1/JD_tools/blob/master/jdCookie.py)识别不了；多个账号换行
 
 ```
 pt_pin=aaaaaaa&pt_key=bbbbbbbbbbbbbb
@@ -47,8 +49,11 @@ actions 查看对应的workflow
 cron 0 0 * * *   #此处表示在国际标准时间0点（北京时间+8，即早上8点）运行
 ```
 
-注意：计划的action最多可能会延迟15分钟。这样做是为了在繁忙时间（例如，UTC上午12:00）保持可靠性。预定的工作流程不应假定它们以最新的准确性启动。
+注意：计划的action最多可能会**延迟**15分钟。这样做是为了在繁忙时间（例如，UTC上午12:00）保持可靠性。预定的工作流程不应假定它们以最新的准确性启动。
 
 
 ## 参考
 http://www.ruanyifeng.com/blog/2019/09/getting-started-with-github-actions.html
+
+[GitHub Actions 手动触发方式进化史](https://p3terx.com/archives/github-actions-manual-trigger.html)
+[GitHub Actions 入门教程](https://p3terx.com/archives/github-actions-started-tutorial.html)

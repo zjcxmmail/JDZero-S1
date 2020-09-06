@@ -3,6 +3,8 @@ name: JD_dongdongPet
 on:
   schedule:
     - cron: '30 3,9,15,16,22 * * *'
+  watch:
+    types: [started]
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -2,6 +2,7 @@ import jdCookie
 import json
 import requests
 import time
+import random
 
 """
 京小超 cron 5 * * * * 
@@ -29,7 +30,7 @@ TODO:
 flag_prize_1000 = 1  # 京豆打包兑换(优先)
 flag_prize_1 = 1  # 单个京豆兑换
 flag_upgrade = 1  # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
-flag_withdraw = 1  # 商圈pk没有赢面时自动退出,1小时后执行进入其他队伍
+flag_withdraw = 1  # 商圈pk没有赢面(差值高于300)时自动更换队伍,反复横跳
 
 # 商圈助力码
 inviteCodes = ["IhM_beyxYPwg82i6iw", "YF5-KbvnOA", "eU9YaLm0bq4i-TrUzSUUhA"]
@@ -346,14 +347,18 @@ def businessCircle(cookies):
     pkStatus  1 正在pk
     pkPrizeStatus 4 不可领奖  3 未加入
     """
+    print("\n【我的商圈】")
     data = getTemplate(cookies, "smtg_businessCirclePKDetail", {})[
         "data"]
     if data["bizCode"] != 0:
         print(data)
         print(data["bizMsg"])
         if data["bizCode"] == 206:
+            businessCircleVOList = getTemplate(cookies, "smtg_getBusinessCircleList", {})[
+                "data"]["result"]["businessCircleVOList"]
+            circleId = random.choice(businessCircleVOList)["circleId"]
             print(getTemplate(cookies, "smtg_joinBusinessCircle", {
-                  "circleId": "IhM_beyxYPwg82i6iw_1599663484041"}))
+                  "circleId": circleId}))
         return
     result = getTemplate(cookies, "smtg_businessCircleIndex", {})[
         "data"]["result"]
@@ -372,7 +377,6 @@ def businessCircle(cookies):
     if pkStatus == 2:
         return
 
-    print("\n【我的商圈】")
     # print(getTemplate(cookies, "smtg_quitBusinessCircle", {}))
     result = data["result"]
     print(f"""inviteCode:{result["inviteCode"]}""")
@@ -384,7 +388,7 @@ def businessCircle(cookies):
     print(
         f"""hotPoint(对方/我方): {otherBusinessCircleVO["hotPoint"]}/{BusinessCircleVO["hotPoint"]}""")
 
-    if otherBusinessCircleVO["hotPoint"]-BusinessCircleVO["hotPoint"] >= 300 and flag_withdraw == 1:
+    if otherBusinessCircleVO["hotPoint"]-BusinessCircleVO["hotPoint"] >= 300:
         print(getTemplate(cookies, "smtg_quitBusinessCircle", {}))
         return
     result = getTemplate(cookies, "smtg_queryPkTask", {})["data"]["result"]

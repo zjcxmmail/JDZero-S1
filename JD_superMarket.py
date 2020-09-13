@@ -290,6 +290,9 @@ def queryPrize(cookies):
     prizeList = getTemplate(cookies, "smtg_queryPrize", {})[
         "data"]["result"]["prizeList"]
     t = [i for i in prizeList if i["type"] == 3]
+    if not t:
+        print("兑换京豆 已下线")
+        return
     if flag_prize_1000 == 1:
         tt = t[1]
         if tt["targetNum"] == tt["finishNum"]:

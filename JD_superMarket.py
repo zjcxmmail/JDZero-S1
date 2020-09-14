@@ -27,8 +27,8 @@ TODO:
 优先安排生产
 """
 # 参数设置,开启置1,关闭置0
-flag_prize_1000 = 1  # 京豆打包兑换(优先)
-flag_prize_1 = 1  # 单个京豆兑换
+flag_prize_1000 = 1  # 京豆打包兑换
+flag_prize_1 = 1  # 单个京豆兑换,万能的京豆
 flag_upgrade = 1  # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
 flag_withdraw = 1  # 商圈pk没有赢面(差值高于300)时自动更换队伍,反复横跳
 
@@ -100,8 +100,9 @@ def receiveCoin(cookies):
     if data["bizCode"] == 802:
         print(data["bizMsg"])
         return
+    totalGold = data["result"]["totalGold"]
     print(
-        f"""totalGold:{data["result"]["totalGold"]}(+{data["result"]["receivedGold"]})""")
+        f"""totalGold:{format(totalGold,",")} (+{format(data["result"]["receivedGold"],",")})""")
 
 
 def upgrade(cookies):
@@ -161,8 +162,13 @@ def shelfList(cookies):
 
 def sign(cookies):
     print("\n【每日签到】")
-    hadSigned = getTemplate(cookies, "smtg_signList", {})[
-        "data"]["result"]["hadSigned"]
+    # hadSigned = getTemplate(cookies, "smtg_signList", {})[
+    #     "data"]["result"]["hadSigned"]
+    data = getTemplate(cookies, "smtg_signList", {})["data"]
+    if data["bizCode"] != 0:
+        print(data["bizMsg"])
+        return
+    hadSigned = data["result"]["hadSigned"]
     if hadSigned == 1:
         print("sign ok")
         return
@@ -274,7 +280,9 @@ def shelfProductList(cookies, shelfId):
         return
     limitTimeProduct = [i["productId"]
                         for i in productList if i["productType"] == 2]  # 此处限时商品未分配才会出现
+
     if limitTimeProduct:
+
         print("优先上架限时产品")
         ground(cookies, limitTimeProduct[0], shelfId)
         return
@@ -287,41 +295,36 @@ def queryPrize(cookies):
         return
     print("\n【兑换京豆查询】")
     _, totalBlue = currentGold(cookies)
-    prizeList = getTemplate(cookies, "smtg_queryPrize", {})[
-        "data"]["result"]["prizeList"]
+    data = getTemplate(cookies, "smtg_queryPrize", {})[
+        "data"]
+    # print(data)
+    if data["bizCode"] != 0:
+        print(data["bizMsg"])
+        return
+    prizeList = data["result"]["prizeList"]
     t = [i for i in prizeList if i["type"] == 3]
     if not t:
         print("兑换京豆 已下线")
         return
-    if flag_prize_1000 == 1:
-        tt = t[1]
-        if tt["targetNum"] == tt["finishNum"]:
-            print("[京豆大礼包]今日兑换完成")
-            return
-        if tt["blueCost"] <= totalBlue:
-            print(getTemplate(cookies, "smtg_obtainPrize",
-                              {"prizeId": tt["prizeId"]}))
-        else:
-            print("[京豆大礼包] Blue不足")
-    if flag_prize_1 == 1:
-        tt = t[0]
-        if tt["targetNum"] == tt["finishNum"]:
-            print("[万能的京豆]今日兑换完成")
-            return
-        if totalBlue < tt["blueCost"]:
-            print("[万能的京豆] Blue不足")
-            return
-
-        for i in range(tt["targetNum"]-tt["finishNum"]):
+    for i in t:
+        # print(i)
+        if i["beanType"] == "Bean" and flag_prize_1 != 1:
+            print("万能的京豆  自动兑换关闭  flag_prize_1")
+            continue
+        if i["beanType"] == "BeanPackage" and flag_prize_1000 != 1:
+            print("京豆大礼包  自动兑换关闭 flag_prize_1000")
+            continue
+        if i["targetNum"] == i["finishNum"]:
+            print(f"[{i['title']}]      今日兑换完成")
+            continue
+        if i["blueCost"] > totalBlue:
+            print(f"[{i['title']}]   蓝币不足")
+            continue
+        for i in range(i["targetNum"]-i["finishNum"]):
             data = getTemplate(cookies, "smtg_obtainPrize",
-                               {"prizeId": tt["prizeId"]})["data"]
-            # print(data)
-            if data["bizCode"] == 507:
-                print("[万能的京豆] 个人兑换次数限制")
-                return
-            time.sleep(1)
-            if data["result"]["exchangeNum"] == tt["targetNum"] or data["result"]["blue"] < tt["blueCost"]:
-                print("[万能的京豆] 无法兑换")
+                               {"prizeId": i["prizeId"]})["data"]
+            if data["bizCode"] == 507 or data["result"]["exchangeNum"] == i["targetNum"] or data["result"]["blue"] < i["blueCost"]:
+                print("兑换限制")
                 return
 
 
@@ -417,13 +420,11 @@ for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
     receiveCoin(cookies)
     receiveBlue(cookies)
-    # limitTimePro(cookies)
     queryPrize(cookies)
     businessCircle(cookies)
     shelfList(cookies)
     upgrade(cookies)
     sign(cookies)
     dailyTask(cookies)
-
     print("##"*25)
     print("\n\n")

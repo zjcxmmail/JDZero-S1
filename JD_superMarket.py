@@ -320,7 +320,7 @@ def queryPrize(cookies):
         if i["blueCost"] > totalBlue:
             print(f"[{i['title']}]   蓝币不足")
             continue
-        for i in range(i["targetNum"]-i["finishNum"]):
+        for _ in range(i["targetNum"]-i["finishNum"]):
             data = getTemplate(cookies, "smtg_obtainPrize",
                                {"prizeId": i["prizeId"]})["data"]
             if data["bizCode"] == 507 or data["result"]["exchangeNum"] == i["targetNum"] or data["result"]["blue"] < i["blueCost"]:

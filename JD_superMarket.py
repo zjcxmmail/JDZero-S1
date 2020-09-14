@@ -323,9 +323,13 @@ def queryPrize(cookies):
         for _ in range(i["targetNum"]-i["finishNum"]):
             data = getTemplate(cookies, "smtg_obtainPrize",
                                {"prizeId": i["prizeId"]})["data"]
+            if data["bizCode"]!=0:
+                print(data["bizMsg"])  # 暂时无法看到库存
+                return
             if data["bizCode"] == 507 or data["result"]["exchangeNum"] == i["targetNum"] or data["result"]["blue"] < i["blueCost"]:
                 print("兑换限制")
                 return
+            time.sleep(1)
 
 
 def limitTimePro(cookies):

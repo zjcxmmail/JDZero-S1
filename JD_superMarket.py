@@ -5,13 +5,16 @@ import time
 import random
 
 """
-京小超 cron 5 * * * * 
+京小超 cron 5 * * * *  
+基本完结
 
 1.日常任务、商圈pk任务、领取pk奖励
-2.自动领取金币、蓝币小费
+2.自动领取金币、蓝币小费和领取限时商品的蓝币奖励
 3.货架与商品的解锁、上架、升级
-4.优先上架限时商品和领取限时商品的蓝币奖励
+4.*空货架*优先上架限时商品
 5.自动兑换京豆奖励
+6.优先安排生产最大单价商品
+7.限时商品自动*替换*普通商品
 
 金币使用顺序:
 1、解锁货架
@@ -23,14 +26,14 @@ import random
 1.解锁、升级商品(跳过低级商品)
 2.升级货架
 
-TODO:
-优先安排生产
+
 """
 # 参数设置,开启置1,关闭置0
-flag_prize_1000 = 1  # 京豆打包兑换
-flag_prize_1 = 1  # 单个京豆兑换,万能的京豆
+flag_prize_1000 = 0  # 京豆打包兑换
+flag_prize_1 = 0  # 单个京豆兑换,万能的京豆
 flag_upgrade = 1  # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
 flag_withdraw = 1  # 商圈pk没有赢面(差值高于300)时自动更换队伍,反复横跳
+flag_limitTimeProduct = 1  # 自动上架限时商品(替换普通商品,同类型至少两个商品)
 
 # 商圈助力码
 inviteCodes = ["IhM_beyxYPwg82i6iw", "YF5-KbvnOA", "eU9YaLm0bq4i-TrUzSUUhA"]
@@ -118,6 +121,7 @@ def upgrade(cookies):
     shelfCategory_3 = [i for i in productList if i["shelfCategory"] == 3][-2:]
 
     for i in shelfCategory_1+shelfCategory_2+shelfCategory_3:
+        print(i["unlockStatus"], i["name"])
         if i["unlockStatus"] == 1:
             unlockproduct(cookies, i["productId"])
             break
@@ -323,8 +327,8 @@ def queryPrize(cookies):
         for _ in range(i["targetNum"]-i["finishNum"]):
             data = getTemplate(cookies, "smtg_obtainPrize",
                                {"prizeId": i["prizeId"]})["data"]
-            if data["bizCode"]!=0:
-                print(data["bizMsg"])  # 暂时无法看到库存
+            if data["bizCode"] != 0:
+                print(data["bizMsg"])
                 return
             if data["bizCode"] == 507 or data["result"]["exchangeNum"] == i["targetNum"] or data["result"]["blue"] < i["blueCost"]:
                 print("兑换限制")
@@ -333,23 +337,26 @@ def queryPrize(cookies):
 
 
 def limitTimePro(cookies):
+    print("\n>>>>上架限时商品")
+    if flag_limitTimeProduct != 1:
+        print("flag_limitTimeProduct不为1 跳出")
+        return
     data = getTemplate(cookies, "smtg_productList", {})[
         "data"]["result"]["productList"]
     productList = [i for i in data if i["productType"]
                    == 2 and i["groundStatus"] == 1]  # 未上架的限时
+    if not productList:
+        print("限时商品已经上架")
+        return
     for i in productList:
         shelfCategory = i["shelfCategory"]
         data = getTemplate(cookies, "smtg_shelfList", {})[
             "data"]["result"]["shelfList"]
         shelfList = [i["shelfId"] for i in data if i["shelfCategory"]
-                     == shelfCategory and i["groundStatus"] == 2]
-        for j in shelfList:
-            productList = getTemplate(cookies, "smtg_shelfProductList", {"shelfId": j})[
-                'data']["result"]["productList"]
-            productList = [i for i in productList if i["productType"] == 1]
-            list2 = sorted(
-                productList, key=lambda productList: productList["previewTotalPriceGold"])
-            print(list2[-1])
+                     == shelfCategory and i["groundStatus"] in [1, 2]]
+        print(shelfList)
+        if len(shelfList) > 1:
+            ground(cookies, i["productId"], shelfList[-1])
 
 
 def businessCircle(cookies):
@@ -420,6 +427,24 @@ def businessCircle(cookies):
         print("\n")
 
 
+def manage(cookies):
+    print("\n>>>>安排上货(单价最大商品)")
+    shelfList = getTemplate(cookies, "smtg_shelfList", {})[
+        "data"]["result"]["shelfList"]
+    shelfList_unlock = [
+        i for i in shelfList if i["groundStatus"] in [1, 2]]  # 可以上架的货架
+    for i in shelfList_unlock:
+        productList = getTemplate(cookies, "smtg_shelfProductList", {"shelfId": i["shelfId"]})[
+            'data']["result"]["productList"]  # 该货架可上架的商品
+        _productNow = [i for i in productList if i["groundStatus"] == 2]
+        productList = [i for i in productList if i["productType"] == 1]
+        list2 = sorted(
+            productList, key=lambda productList: productList["previewTotalPriceGold"])
+        if len(list2) and _productNow and _productNow[0]["productId"] == list2[-1]["productId"]:
+            continue
+        ground(cookies, list2[-1]["productId"], i["shelfId"])
+
+
 for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
     receiveCoin(cookies)
@@ -430,5 +455,7 @@ for cookies in jdCookie.get_cookies():
     upgrade(cookies)
     sign(cookies)
     dailyTask(cookies)
+    manage(cookies)
+    limitTimePro(cookies)
     print("##"*25)
     print("\n\n")

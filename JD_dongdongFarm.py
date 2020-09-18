@@ -334,6 +334,7 @@ for cookies in jdCookie.get_cookies():
     treeEnergy = result["farmUserPro"]["treeEnergy"]
     lastTimes = int((result["farmUserPro"]["treeTotalEnergy"]-treeEnergy)/10)
     print(f"""\n\n[ {nickName} ]\n{result["farmUserPro"]["name"]}""")
+    print(f'已经薅了{result["farmUserPro"]["winTimes"]}次')
     print(f"""我的助力码: {myshareCode}""")
     print(
         f"""treeEnergy: {treeEnergy}/{result["farmUserPro"]["treeTotalEnergy"]}""")

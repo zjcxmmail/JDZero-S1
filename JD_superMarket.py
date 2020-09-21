@@ -346,7 +346,7 @@ def limitTimePro(cookies):
     productList = [i for i in data if i["productType"]
                    == 2 and i["groundStatus"] == 1]  # 未上架的限时
     if not productList:
-        print("限时商品已经上架")
+        print("限时商品已经上架或暂时没有限时商品")
         return
     for i in productList:
         shelfCategory = i["shelfCategory"]

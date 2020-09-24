@@ -49,3 +49,7 @@ GitHub action自动运行，账号信息读取自`Repo-Setting-Secrets`
 1. 使用Server酱的需要参数`SCKEY`   
 2. 使用SMTP邮件服务的填写`email_dict`  
 3. 使用bark的填写`BARK`
+
+### 自动同步上游仓库
+
+有能力且需要的同学可以参考[讨论](https://github.com/Zero-S1/JD_tools/pull/42)

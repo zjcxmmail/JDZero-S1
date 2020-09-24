@@ -14,8 +14,11 @@
 - 京喜工厂 JD_dreamFactory.py (弃坑)
 - 京小超   JD_superMarket.py
 - 京奇世界 jingqiWorld.py
-- 取消关注 jd_unfollow.py
 - 摇京豆   JD_vvipclub.py
+
+
+- 取消关注 jd_unfollow.py
+- 互助合集 jdShareCodes.py
 
 
 ### 运行方式

@@ -3,6 +3,7 @@ import json
 import requests
 import time
 import notification
+import jdShareCodes
 """
 1、从jdCookie.py处填写 cookie
 2、shareCode 为自己的助力码，但是需要别人为自己助力
@@ -20,6 +21,9 @@ shareCodes = ["c081c648576e4e61a9697c3981705826",
               "f1d0d5ebda7c48c6b3d262d5574315c7",
               "13d13188218a4e3aae0c4db803c81985"]
 
+if jdShareCodes.shareCodes_farm:
+    shareCodes = jdShareCodes.shareCodes_farm
+print("实际执行的助力码: ",shareCodes)
 
 def postTemplate(cookies, functionId, body):
     headers = {

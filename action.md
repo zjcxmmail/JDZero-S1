@@ -6,13 +6,9 @@
 
 1. fork本项目
 
-2. Settings - Secrets    填写cookie信息，此处专用于保存私密信息
+2. Settings - Secrets    填写账号信息，此处专用于保存私密信息
 
-3. 将其命名为`JD_COOKIE`,需要server酱的添加`SCKEY`
-
-4. 可能需要提交一次修改才会启动workflow (schedule定时运行，很多人反馈fork后没有定时运行，原因可能在此)  
-  
-   部分脚本可以通过star手动执行，方便观察是否出错
+3. 新增命名为`JD_COOKIE`, **必须**  
 
    ![Snipaste_2020-08-13_20-09-30](p/Snipaste_2020-08-13_20-09-30.png)
 
@@ -22,6 +18,11 @@
 pt_pin=aaaaaaa&pt_key=bbbbbbbbbbbbbb
 pt_pin=ccccccccc&pt_key=dddddddddddddd
 ```
+4.  **额外**需要通知服务的需要server酱的添加`SCKEY`,使用bark的填写`BARK`
+
+5. 可能需要提交一次修改才会启动workflow (schedule定时运行，很多人反馈fork后没有定时运行，原因可能在此)  
+  
+   部分脚本可以通过star手动执行，方便观察是否出错
 
 
 
@@ -49,7 +50,7 @@ actions 查看对应的workflow
 cron 0 0 * * *   #此处表示在国际标准时间0点（北京时间+8，即早上8点）运行
 ```
 
-注意：计划的action最多可能会**延迟**15分钟。这样做是为了在繁忙时间（例如，UTC上午12:00）保持可靠性。预定的工作流程不应假定它们以最新的准确性启动。
+**注意**：计划的action可能会**延迟**很多分钟。
 
 
 ## 参考

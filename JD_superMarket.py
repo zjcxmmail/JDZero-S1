@@ -3,6 +3,7 @@ import json
 import requests
 import time
 import random
+import jdShareCodes
 
 """
 京小超 cron 5 * * * *  
@@ -38,6 +39,9 @@ flag_limitTimeProduct = 1  # 自动上架限时商品(替换普通商品,同类�
 # 商圈助力码
 inviteCodes = ["IhM_beyxYPwg82i6iw", "YF5-KbvnOA", "eU9YaLm0bq4i-TrUzSUUhA"]
 
+if jdShareCodes.shareCodes_superMarket:
+    inviteCodes = jdShareCodes.shareCodes_superMarket
+print("实际执行的助力码: ",inviteCodes)
 
 def getTemplate(cookies, functionId, body):
     headers = {

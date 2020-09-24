@@ -25,5 +25,6 @@ jobs:
         env:
             JD_COOKIE: ${{ secrets.JD_COOKIE }}
             SCKEY: ${{ secrets.SCKEY }}
+            BARK: ${{ secrets.BARK }}
      
     

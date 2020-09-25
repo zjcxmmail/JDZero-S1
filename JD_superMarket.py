@@ -13,7 +13,7 @@ import jdShareCodes
 2.自动领取金币、蓝币小费和领取限时商品的蓝币奖励
 3.货架与商品的解锁、上架、升级
 4.*空货架*优先上架限时商品
-5.自动兑换京豆奖励
+5.自动兑换京豆奖励   (x)  由JD_superMarket_reward.py实现
 6.优先安排生产最大单价商品
 7.限时商品自动*替换*普通商品
 
@@ -30,8 +30,6 @@ import jdShareCodes
 
 """
 # 参数设置,开启置1,关闭置0
-flag_prize_1000 = 0  # 京豆打包兑换
-flag_prize_1 = 0  # 单个京豆兑换,万能的京豆
 flag_upgrade = 1  # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
 flag_withdraw = 1  # 商圈pk没有赢面(差值高于300)时自动更换队伍,反复横跳
 flag_limitTimeProduct = 1  # 自动上架限时商品(替换普通商品,同类型至少两个商品)
@@ -453,7 +451,6 @@ for cookies in jdCookie.get_cookies():
     print(f"""[ {cookies["pt_pin"]} ]""")
     receiveCoin(cookies)
     receiveBlue(cookies)
-    queryPrize(cookies)
     businessCircle(cookies)
     shelfList(cookies)
     upgrade(cookies)

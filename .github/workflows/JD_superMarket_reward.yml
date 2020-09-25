@@ -1,0 +1,28 @@
+name: 京小超领取京豆
+
+on:
+  schedule:
+    - cron: '0 */12 * * * '
+  watch:
+    types: [started]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: 'Set up Python'
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+         
+      - name: 'Install requirements'
+        run: pip install -r ./requirements.txt 
+        
+      - name: 'run 京小超领取京豆' 
+        run: python3 JD_superMarket_reward.py 
+        env:
+            JD_COOKIE: ${{ secrets.JD_COOKIE }}
+           
+     

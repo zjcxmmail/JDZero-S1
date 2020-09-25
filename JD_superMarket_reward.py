@@ -3,7 +3,7 @@ import json
 import requests
 import time
 
-# 京小超自动兑换京豆
+# 京小超自动兑换京豆  cron 0 */12 * * *
 # 参数设置,开启置1,关闭置0
 flag_prize_1000 = 1  # 京豆打包兑换
 flag_prize_1 = 1  # 单个京豆兑换,万能的京豆

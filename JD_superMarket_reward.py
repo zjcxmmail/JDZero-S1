@@ -74,6 +74,7 @@ def exchangeBean_1(cookies):
     t1 = [i for i in prizeList if i["beanType"] == "Bean"]
     if t1:
         t1 = t1[0]
+        print(t1)
         if t1["targetNum"] == t1["finishNum"]:
             print("万能的京豆   今日兑换完成")
             return
@@ -102,7 +103,7 @@ def exchangeBean_1000(cookies):
     t1000 = [i for i in prizeList if i["beanType"] == "BeanPackage"]
     if t1000:
         t1000 = t1000[0]
-        # print(t1000)
+        print(t1000)
         if t1000["targetNum"] == t1000["finishNum"]:
             print("京豆大礼包   今日兑换完成")
             return

@@ -19,6 +19,7 @@
 
 - 取消关注 jd_unfollow.py
 - 互助合集 jdShareCodes.py
+- 喜马拉雅极速    [xmly_speed](xmly_speed.py) 
 
 
 ### 运行方式

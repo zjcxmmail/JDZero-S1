@@ -2,7 +2,7 @@ name: jd_farm_help
 
 on:
   schedule:
-    - cron: '23 */6 * * * '
+    - cron: '23 */12 * * * '
   watch:
     types: [started]
 jobs:

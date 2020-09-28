@@ -65,7 +65,13 @@ def help(cookies):
     myFriendCode = [i["shareCode"]
                     for i in data["friends"] if "shareCode" in i]
     countOfFriend = data["countOfFriend"]
-    lastId = [i for i in data["friends"]][-1]["id"]
+    #lastId = [i for i in data["friends"]][-1]["id"]
+    _friendsList=[i for i in data["friends"]]
+    if not _friendsList:
+        print("好友列表为空  跳出")
+        print(data)
+        return
+    lastId =  _friendsList[-1]["id"]
     print(f"""fullFriend:{data["fullFriend"]}""")  # 好友添加总数有上限
     for i in range(countOfFriend//20):
         result = postTemplate(cookies, "friendListInitForFarm",

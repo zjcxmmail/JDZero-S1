@@ -142,6 +142,9 @@ def takeTask(cookies, taskId):
                              params=params, cookies=cookies, data=data)
     result = json.loads(response.text)
     print(result)
+    if "data" not in result:
+        print(f'taskId: {taskId} 任务列表为空,手动进入app内检查')
+        return
     taskList = result["data"]["result"]["advertDetails"]
     for i in taskList:
         detailId = i["id"]

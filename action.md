@@ -20,7 +20,7 @@ pt_pin=ccccccccc&pt_key=dddddddddddddd
 ```
 4.  **额外**需要通知服务的需要server酱的添加`SCKEY`,使用bark的填写`BARK`
 
-5. 可能需要提交一次修改才会启动workflow (schedule定时运行，很多人反馈fork后没有定时运行，原因可能在此)  
+5. **必须**需要提交一次修改才会启动workflow (schedule定时运行，很多人反馈fork后没有定时运行，原因可能在此)  
   
    部分脚本可以通过star手动执行，方便观察是否出错
 

@@ -27,7 +27,7 @@ print("实际执行的助力码: ",shareCodes)
 
 def postTemplate(cookies, functionId, body):
     headers = {
-        'User-Agent': 'JD4iPhone/167249 (iPhone; iOS 13.5.1; Scale/3.00)',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
         'Host': 'api.m.jd.com',
         'Content-Type': 'application/x-www-form-urlencoded',
     }
@@ -46,7 +46,7 @@ def postTemplate(cookies, functionId, body):
 
 def getTemplate(cookies, functionId, body):
     headers = {
-        'User-Agent': 'JD4iPhone/167249 (iPhone; iOS 13.5.1; Scale/3.00)',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
         'Host': 'api.m.jd.com',
     }
     body["version"] = 4

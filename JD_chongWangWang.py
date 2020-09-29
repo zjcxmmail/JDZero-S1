@@ -222,6 +222,7 @@ def reward(cookies):
     response = requests.get('https://jdjoy.jd.com/gift/getHomeInfo',
                             headers=headers_app, cookies=cookies)
     result = response.json()
+    print(result)
     giftSaleInfos = result["data"]["levelSaleInfos"]["giftSaleInfos"]
     jd_bean = [i for i in giftSaleInfos if i["giftType"] == "jd_bean"]
     if not jd_bean:

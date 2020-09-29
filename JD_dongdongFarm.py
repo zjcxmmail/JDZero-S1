@@ -61,7 +61,20 @@ def getTemplate(cookies, functionId, body):
                             headers=headers, params=params, cookies=cookies)
     return response.json()
 
-
+def duck(cookies):
+    print("\n【小鸭子】")
+    result = postTemplate(cookies, "getFullCollectionReward", {"type": 2,"version":6})
+    print(result)
+    if result["code"]=="10" or result["hasLimit"]:
+        print(">>>小鸭子游戏达到上限,跳出")
+        return
+    for _ in range(4):
+        result = postTemplate(cookies, "getFullCollectionReward", {"type": 2,"version":6})
+        print(result)
+        if result["code"]=="10" or result["hasLimit"]:
+            print(">>>小鸭子游戏达到上限,跳出")
+            return
+          
 def luck(cookies):
     print("\n【随机水滴】")
     result = postTemplate(cookies, "gotWaterGoalTaskForFarm", {"type": 3})
@@ -349,6 +362,7 @@ for cookies in jdCookie.get_cookies():
     totalWaterTaskTimes = takeTask(cookies)
     masterHelp(cookies)
     luck(cookies)
+    duck(cookies)
     friends(cookies)
     bag(cookies)
     water(cookies, totalWaterTaskTimes,

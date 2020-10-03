@@ -1,4 +1,4 @@
-# JD_tools使用说明
+# JD_tools使用说明(暂停维护)
 
 > 基于python的薅羊毛小工具  
 > 欢迎留下对应的shareCode互助

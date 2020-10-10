@@ -128,7 +128,7 @@ for cookies in jdCookie.get_cookies():
         print(">>>> 跳过游戏")
     for i in range(remainingTimes):
         gain_coin(cookies)
-        time.sleep(0.6)
+        time.sleep(3)
         exchange(cookies)
-        time.sleep(0.5)
+        time.sleep(3)
     print("\n\n")

@@ -130,5 +130,5 @@ for cookies in jdCookie.get_cookies():
         gain_coin(cookies)
         time.sleep(3)
         exchange(cookies)
-        time.sleep(3)
+        time.sleep(1)
     print("\n\n")

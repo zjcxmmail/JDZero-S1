@@ -401,7 +401,7 @@ def businessCircle(cookies):
 
     # print(getTemplate(cookies, "smtg_quitBusinessCircle", {}))
     result = data["result"]
-    print(f"""inviteCode:{result["inviteCode"]}""")
+    print(f"""\n\n>>>>>>>>>>>>>>>>我的商圈助力码: {result["inviteCode"]}\n""")
     BusinessCircleVO = result["businessCircleVO"]
     # print(f"""circleId:{BusinessCircleVO["circleId"]}""")
     otherBusinessCircleVO = result["otherBusinessCircleVO"]

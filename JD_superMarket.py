@@ -203,9 +203,12 @@ def currentGold(cookies):
 
 def dailyTask(cookies):
     print("\n【店铺任务】")
-    taskList = getTemplate(cookies, "smtg_queryShopTask", {})[
-        "data"]["result"]["taskList"]
-    for i in taskList:
+    data = getTemplate(cookies, "smtg_queryShopTask", {})[
+        "data"]
+    if "result" not in data:
+        print("跳出")
+        return
+    for i in data["result"]["taskList"]:
         print(f"""{i["title"]:>5}   {i["finishNum"]}/{i["targetNum"]}""")
         if i["taskStatus"] == 1 and i["prizeStatus"] == 1:
             print("obtainShopTaskPrize: ", getTemplate(cookies, "smtg_obtainShopTaskPrize",

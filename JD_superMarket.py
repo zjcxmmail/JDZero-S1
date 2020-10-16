@@ -83,20 +83,14 @@ def postTemplate(cookies, functionId, body):
     return response.json()
 
 def lottery(cookies):
-    print("\n【抽奖】")
-    data = getTemplate(cookies, "smtg_lotteryIndex", {})[
-        "data"]
-    if data["bizCode"] != 0:
-        print(data)
-        return
-
-    result = data["result"]
-    if result["remainedDrawTimes"] == 0:
-        print("今日机会用完")
-        return
-    if result["costCoins"] <= result["goldCoins"] and result["remainedDrawTimes"] > 0:
-        data = getTemplate(cookies, "smtg_drawLottery", {})["data"]
-        print(data)
+    print("\n【招财进宝】")
+    for _ in range(3):
+        result = getTemplate(cookies, "smtg_drawLottery", {})["data"]
+        if result["success"]:
+            print(result["result"])
+        else:
+            print(result["bizMsg"])
+            return
           
 def receiveBlue(cookies):
     print("\n【限时商品蓝币领取】")

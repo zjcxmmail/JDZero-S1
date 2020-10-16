@@ -82,7 +82,22 @@ def postTemplate(cookies, functionId, body):
                             headers=headers, params=params, cookies=cookies)
     return response.json()
 
+def lottery(cookies):
+    print("\n【抽奖】")
+    data = getTemplate(cookies, "smtg_lotteryIndex", {})[
+        "data"]
+    if data["bizCode"] != 0:
+        print(data)
+        return
 
+    result = data["result"]
+    if result["remainedDrawTimes"] == 0:
+        print("今日机会用完")
+        return
+    if result["costCoins"] <= result["goldCoins"] and result["remainedDrawTimes"] > 0:
+        data = getTemplate(cookies, "smtg_drawLottery", {})["data"]
+        print(data)
+          
 def receiveBlue(cookies):
     print("\n【限时商品蓝币领取】")
     data = getTemplate(cookies, "smtg_receiveCoin", {"type": 1})["data"]
@@ -461,5 +476,6 @@ for cookies in jdCookie.get_cookies():
     dailyTask(cookies)
     manage(cookies)
     limitTimePro(cookies)
+    lottery(cookies)
     print("##"*25)
     print("\n\n")

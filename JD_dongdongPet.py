@@ -29,7 +29,8 @@ def functionTemplate(cookies, functionId, body):
         'Content-Type': 'application/x-www-form-urlencoded',
     }
     params = (('functionId', functionId),)
-    body["version"] = 1
+    body["version"] = 2
+    body["channel"] = 'app'
     data = {'body': json.dumps(body), 'appid': "wh5", "clientVersion": "9.0.4"}
     response = requests.post('https://api.m.jd.com/client.action',
                              headers=headers, params=params, cookies=cookies, data=data)

@@ -85,7 +85,7 @@ def postTemplate(cookies, functionId, body):
 def lottery(cookies):
     print("\n【招财进宝】")
     for _ in range(3):
-        result = getTemplate(cookies, "smtg_drawLottery", {})["data"]
+        result = getTemplate(cookies, "smtg_drawLottery", {"costType":1,"channel":1})["data"]
         if result["success"]:
             print(result["result"])
         else:
@@ -224,10 +224,10 @@ def dailyTask(cookies):
                                                        {"taskId": i["taskId"]}))
         if i["taskStatus"] == 1:
             continue
-        if i["type"] == 1:  # 分享
+        if i["type"] in [1,11]:  # 分享、指定入口
             print("doshareTask: ", getTemplate(cookies, "smtg_doShopTask",
                                                {"taskId": i["taskId"]}))
-        if i["type"] in [2, 8]:  # 会场,商铺
+        if i["type"] in [2, 8,10]:  # 会场,商铺,商品
             itemId = i["content"][list(i["content"].keys())[0]]["itemId"]
             print("doShopTask: ", getTemplate(cookies, "smtg_doShopTask",
                                               {"taskId": i["taskId"], "itemId": itemId}))

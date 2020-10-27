@@ -14,4 +14,4 @@ shareCodes = ["c081c648576e4e61a9697c3981705826",
 shareCodes_farm = []  # 东东农场,最多助力4个
 shareCodes_plantBean = []  # 种豆得豆,最多助力3个
 shareCodes_pet = []  # 东东萌宠,最多助力3个
-shareCodes_superMarket = []  # 京小超,未知
+# shareCodes_superMarket = []  # 京小超,未知  失效

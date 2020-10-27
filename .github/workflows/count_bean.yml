@@ -1,0 +1,28 @@
+name: 京豆统计(当日)
+
+on:
+  schedule:
+    - cron: '30 10 * * * '
+  watch:
+    types: [started]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: 'Set up Python'
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+         
+      - name: 'Install requirements'
+        run: pip install -r ./requirements.txt 
+        
+      - name: 'run count_bean' 
+        run: python3 count_bean.py 
+        env:
+            JD_COOKIE: ${{ secrets.JD_COOKIE }}
+            SCKEY: ${{ secrets.SCKEY }}
+            BARK: ${{ secrets.BARK }}

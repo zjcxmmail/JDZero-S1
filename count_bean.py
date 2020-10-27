@@ -6,7 +6,10 @@ from datetime import datetime
 import os
 from dateutil import tz
 import notification
-
+"""
+统计当天的京豆
+cron 30 18 * * *
+"""
 
 def totalBean(cookies):
     headers = {

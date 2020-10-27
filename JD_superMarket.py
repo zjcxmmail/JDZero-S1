@@ -341,8 +341,9 @@ def pk(cookies):
         print(
             f'{data["pkUserPkInfo"]["teamCount"]}/{data["currentUserPkInfo"]["teamCount"]}')
     if data["joinStatus"] == 0:
+        inviteCodeList=["IhM_beyxYPwg82i6iw","YF5-KbvnOA","eU9YaLm0bq4i-TrUzSUUhA"]
         result1 = getTemplate(cookies, "smtg_joinPkTeam", {"teamId": "IhM_beyxYPwg82i6iw_1603680889867",
-                                                           "inviteCode": "IhM_beyxYPwg82i6iw", "sharePkActivityId": "1603555200000", "channel": "3"})
+                                                           "inviteCode": random.choice(inviteCodeList), "sharePkActivityId": data["pkActivityId"], "channel": "3"})
         print(result1)
 
 

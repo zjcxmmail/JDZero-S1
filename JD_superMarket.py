@@ -29,9 +29,9 @@ import random
 
 """
 # 参数设置,开启置1,关闭置0
-flag_upgrade = 1  # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
-flag_limitTimeProduct = 1  # 自动上架限时商品(替换普通商品,同类型至少两个商品)
-
+flag_upgrade = 1              # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
+flag_limitTimeProduct = 1     # 自动上架限时商品(替换普通商品,同类型至少两个商品)
+flag_pk = 1                   # 自动加入zero的队伍
 
 def getTemplate(cookies, functionId, body):
     headers = {
@@ -334,15 +334,32 @@ def pk(cookies):
         "data"]["result"]
     print(f'joinStatus:{data["joinStatus"]}')
     print(f'pkStatus:{data["pkStatus"]}')
+    print(f'邀请人数:{data["inviteCount"]}/50')
+    print(f'京豆奖励:{data["prizeInfo"]["inviteJdBeanCount"]}')
+
     if data["joinStatus"] == 1:
         print(f'已经加入队伍【{data["teamId"]}】')
         print(">>>pk对比\n对方/我方")
         print(
             f'{data["pkUserPkInfo"]["teamCount"]}/{data["currentUserPkInfo"]["teamCount"]}')
-    if data["joinStatus"] == 0:
-        inviteCodeList=["IhM_beyxYPwg82i6iw","YF5-KbvnOA","eU9YaLm0bq4i-TrUzSUUhA"]
-        result1 = getTemplate(cookies, "smtg_joinPkTeam", {"teamId": "IhM_beyxYPwg82i6iw_1603900876017",
-                                                           "inviteCode": random.choice(inviteCodeList), "sharePkActivityId": data["pkActivityId"], "channel": "3"})
+
+    if data["pkStatus"] == 2 and data["prizeInfo"]["pkPrizeStatus"] == 2:
+        print("开始领取")
+        resopnse = getTemplate(cookies, "smtg_receivedPkTeamPrize", {})
+        print(resopnse)
+
+    if data["pkStatus"] == 3:
+        print("pk暂停")
+        return
+    if data["joinStatus"] == 0 and flag_pk == 1:
+        tmp = requests.get(
+            "https://raw.githubusercontent.com/Zero-S1/temp/main/jd_smPkInfo.json").json()
+        if tmp["pkActivityId"] == data["pkActivityId"]:
+            print("还未更新,等待下次运行")
+            return
+        print("自动加入pk队伍")
+        result1 = getTemplate(cookies, "smtg_joinPkTeam", {"teamId": tmp["teamId"],
+                                                           "inviteCode": random.choice(tmp["inviteCodeList"]), "sharePkActivityId": data["pkActivityId"], "channel": "3"})
         print(result1)
 
 
@@ -368,7 +385,6 @@ cookiesList = jdCookie.get_cookies()
 
 for cookies in cookiesList:
     print(f"""[ {cookies["pt_pin"]} ]""")
-    pk(cookies)
     receiveCoin(cookies)
     receiveBlue(cookies)
     shelfList(cookies)
@@ -377,6 +393,7 @@ for cookies in cookiesList:
     dailyTask(cookies)
     manage(cookies)
     limitTimePro(cookies)
+    pk(cookies)
     lottery(cookies)
     print("##"*25)
     print("\n\n")

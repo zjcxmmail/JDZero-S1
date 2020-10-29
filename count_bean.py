@@ -53,6 +53,8 @@ def jingDetailList(cookies, page):
     response = requests.post('https://bean.m.jd.com/beanDetail/detail.json',
                              headers=headers, cookies=cookies, data=data)
     result = response.json()
+    if not result:
+        return []
     beanList = result["jingDetailList"]
     return beanList
 

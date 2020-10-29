@@ -354,7 +354,7 @@ def pk(cookies):
     if data["joinStatus"] == 0 and flag_pk == 1:
         tmp = requests.get(
             "https://raw.githubusercontent.com/Zero-S1/tmp/main/jd_smPkInfo.json").json()
-        if tmp["pkActivityId"] == data["pkActivityId"]:
+        if tmp["pkActivityId"] != data["pkActivityId"]:
             print("还未更新,等待下次运行")
             return
         print("自动加入pk队伍")

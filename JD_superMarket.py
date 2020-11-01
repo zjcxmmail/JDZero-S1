@@ -334,14 +334,15 @@ def pk(cookies):
         "data"]["result"]
     print(f'joinStatus:{data["joinStatus"]}')
     print(f'pkStatus:{data["pkStatus"]}')
-    print(f'邀请人数:{data["inviteCount"]}/50')
-    print(f'京豆奖励:{data["prizeInfo"]["inviteJdBeanCount"]}')
 
     if data["joinStatus"] == 1:
+
         print(f'已经加入队伍【{data["teamId"]}】')
         print(">>>pk对比\n对方/我方")
         print(
             f'{data["pkUserPkInfo"]["teamCount"]}/{data["currentUserPkInfo"]["teamCount"]}')
+        print(f'邀请人数:{data["inviteCount"]}/50')
+        print(f'京豆奖励:{data["prizeInfo"]["inviteJdBeanCount"]}')
 
     if data["pkStatus"] == 2 and data["prizeInfo"]["pkPrizeStatus"] == 2:
         print("开始领取")
@@ -358,8 +359,9 @@ def pk(cookies):
             print("还未更新,等待下次运行")
             return
         print("自动加入pk队伍")
+        # print(tmp)
         result1 = getTemplate(cookies, "smtg_joinPkTeam", {"teamId": tmp["teamId"],
-                                                           "inviteCode": random.choice(tmp["inviteCodeList"]), "sharePkActivityId": data["pkActivityId"], "channel": "3"})
+                                                           "inviteCode": random.choice(tmp["inviteCode"]), "sharePkActivityId": data["pkActivityId"], "channel": "3"})
         print(result1)
 
 

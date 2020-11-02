@@ -31,7 +31,7 @@ import random
 # 参数设置,开启置1,关闭置0
 flag_upgrade = 1              # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
 flag_limitTimeProduct = 1     # 自动上架限时商品(替换普通商品,同类型至少两个商品)
-flag_pk = 1                   # 自动加入zero的队伍
+#flag_pk = 1                   # 自动加入zero的队伍
 
 def getTemplate(cookies, functionId, body):
     headers = {
@@ -352,6 +352,7 @@ def pk(cookies):
     if data["pkStatus"] == 3:
         print("pk暂停")
         return
+    return
     if data["joinStatus"] == 0 and flag_pk == 1:
         tmp = requests.get(
             "https://raw.githubusercontent.com/Zero-S1/tmp/main/jd_smPkInfo.json").json()

@@ -41,7 +41,7 @@
 
 无需特别配置，每天仅需运行一次的脚本
 
-已集成GitHub action [合集](.github\workflows\配置类似的其他合集.yml)
+已集成GitHub action [合集](.github\workflows\工具合集.yml)
 
 | 名称             | 功能       | 备注 |
 | ---------------- | ---------- | ---- |

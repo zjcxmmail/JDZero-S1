@@ -6,12 +6,10 @@ import time
 """
 
 宠汪汪
-1、从jdCookie.py处填写 cookie
-2、FEED_NUM :自定义 每次喂养数量; 等级只和喂养次数有关，与数量无关
-3、聚宝盆玩法 具体可参考 [关于宠汪汪聚宝盆.md]  [jbp.js]
-4、cron 0 */3 * * *  JD_chongWangWang.py  #每隔三小时运行一次，加快升级
-5、自动兑换京豆
-6、佛系参加双人比赛、领取奖励
+1、FEED_NUM :自定义 每次喂养数量; 等级只和喂养次数有关，与数量无关
+2、cron 0 */3 * * *  jd_joy.py  #每隔三小时运行一次，加快升级
+3、自动兑换京豆
+4、佛系参加双人比赛、领取奖励
 """
 
 FEED_NUM = 10   # [10,20,40,80]
@@ -219,27 +217,24 @@ def desk(cookies):
 
 
 def reward(cookies):
+    print("\n【兑换京豆】")
     response = requests.get('https://jdjoy.jd.com/gift/getHomeInfo',
                             headers=headers_app, cookies=cookies)
     result = response.json()
-    if "data" not in result or "levelSaleInfos" not in result["data"]:
-        print(result)
-        print("getHomeInfo 信息为空 跳出")
-        return
     giftSaleInfos = result["data"]["levelSaleInfos"]["giftSaleInfos"]
+
     jd_bean = [i for i in giftSaleInfos if i["giftType"] == "jd_bean"]
-    if not jd_bean:
-        return
-    jd_bean = jd_bean[0]
-    if not jd_bean["leftStock"]:
-        print("库存不足")
-        return
-    data = {
-        "orderSource": "pet", "saleInfoId": jd_bean["id"]
-    }
-    response = requests.post('https://jdjoy.jd.com/gift/exchange',
-                             headers=headers_app, data=json.dumps(data), cookies=cookies)
-    print(response.text)
+    for i in jd_bean:
+        print(f'{i["giftName"]:6}  需要{i["salePrice"]}积分 ')
+        if i["leftStock"] == 0:
+            print(">>>>>库存不足")
+            continue
+        data = {
+            "orderSource": "pet", "saleInfoId": i["id"]
+        }
+        response = requests.post('https://jdjoy.jd.com/gift/exchange',
+                                 headers=headers_app, data=json.dumps(data), cookies=cookies)
+        print(response.text)
     
 def combat(cookies):
     if combat_flag == 0:

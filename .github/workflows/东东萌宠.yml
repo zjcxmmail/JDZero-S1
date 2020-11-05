@@ -1,8 +1,8 @@
-name: 京小超领取京豆
+name: 东东萌宠
 
 on:
   schedule:
-    - cron: '0 */12 * * * '
+    - cron: '30 3,9,15,16,22 * * *'
   watch:
     types: [started]
 jobs:
@@ -20,9 +20,11 @@ jobs:
       - name: 'Install requirements'
         run: pip install -r ./requirements.txt 
         
-      - name: 'run 京小超领取京豆' 
-        run: python3 JD_superMarket_reward.py 
+      - name: 'run 东东萌宠' 
+        run: python3 jd_pet.py 
         env:
             JD_COOKIE: ${{ secrets.JD_COOKIE }}
-           
+            SCKEY: ${{ secrets.SCKEY }}
+            BARK: ${{ secrets.BARK }}
      
+    

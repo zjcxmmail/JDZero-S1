@@ -12,7 +12,7 @@ import random
 2.自动领取金币、蓝币小费
 3.货架与商品的解锁、上架、升级
 4.*空货架*优先上架限时商品和领取限时商品的蓝币奖励
-5.自动兑换京豆奖励   (x)  由JD_superMarket_reward.py实现
+5.自动兑换京豆奖励 
 6.优先安排生产最大单价商品 
 7.限时商品*替换*普通商品
 
@@ -31,7 +31,10 @@ import random
 # 参数设置,开启置1,关闭置0
 flag_upgrade = 1              # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
 flag_limitTimeProduct = 1     # 自动上架限时商品(替换普通商品,同类型至少两个商品)
-#flag_pk = 1                   # 自动加入zero的队伍
+# flag_pk = 1                   # 自动加入zero的队伍
+flag_prize_1000 = 1  # 京豆打包兑换
+flag_prize_1 = 1  # 单个京豆兑换,万能的京豆
+
 
 def getTemplate(cookies, functionId, body):
     headers = {
@@ -162,8 +165,6 @@ def shelfList(cookies):
 
 def sign(cookies):
     print("\n【每日签到】")
-    # hadSigned = getTemplate(cookies, "smtg_signList", {})[
-    #     "data"]["result"]["hadSigned"]
     data = getTemplate(cookies, "smtg_signList", {})["data"]
     if data["bizCode"] != 0:
         print(data["bizMsg"])
@@ -207,7 +208,6 @@ def dailyTask(cookies):
                                                        {"taskId": i["taskId"]}))
         if i["taskStatus"] == 1:
             continue
-        # print(i)
         if i["type"] in [1, 11]:  # 分享、指定入口
             print("doshareTask: ", getTemplate(cookies, "smtg_doShopTask",
                                                {"taskId": i["taskId"]}))
@@ -222,7 +222,6 @@ def dailyTask(cookies):
                 i for i in productList if "upgradeStatus" in i and i["upgradeStatus"] == 1]
             if productListUpgrade:
                 upgradeproduct(cookies, productListUpgrade[-1]["productId"])
-    # exit()
 
 
 def ground(cookies, productId, shelfId):
@@ -353,6 +352,7 @@ def pk(cookies):
         print("pk暂停")
         return
     return
+    """
     if data["joinStatus"] == 0 and flag_pk == 1:
         tmp = requests.get(
             "https://raw.githubusercontent.com/Zero-S1/tmp/main/jd_smPkInfo.json").json()
@@ -364,6 +364,7 @@ def pk(cookies):
         result1 = getTemplate(cookies, "smtg_joinPkTeam", {"teamId": tmp["teamId"],
                                                            "inviteCode": random.choice(tmp["inviteCode"]), "sharePkActivityId": data["pkActivityId"], "channel": "3"})
         print(result1)
+    """
 
 
 def manage(cookies):
@@ -384,6 +385,59 @@ def manage(cookies):
         ground(cookies, list2[-1]["productId"], i["shelfId"])
 
 
+def exchangeBean_1(cookies):
+    if flag_prize_1 != 1:
+        print("[万能的京豆]  自动兑换关闭  flag_prize_1")
+        return
+    print("\n[万能的京豆] 兑换开启")
+    data = getTemplate(cookies, "smtg_queryPrize", {})[
+        "data"]
+    if data["bizCode"] != 0:
+        print(data["bizMsg"])
+        return
+    prizeList = data["result"]["prizeList"]
+    t1 = [i for i in prizeList if i["beanType"] == "Bean"]
+    if t1:
+        t1 = t1[0]
+        if t1["targetNum"] == t1["finishNum"]:
+            print("万能的京豆   今日兑换完成")
+            return
+        for _ in range(t1["targetNum"]):
+            data = getTemplate(cookies, "smtg_obtainPrize",
+                               {"prizeId": t1["prizeId"]})["data"]
+            if data["bizCode"] != 0:
+                print(data["bizMsg"])
+                return
+            time.sleep(1)
+
+
+def exchangeBean_1000(cookies):
+    if flag_prize_1000 != 1:
+        print("[京豆大礼包]  自动兑换关闭  flag_prize_1000")
+        return
+    print("\n[京豆大礼包] 兑换开启")
+    _, totalBlue = currentGold(cookies)
+    data = getTemplate(cookies, "smtg_queryPrize", {})[
+        "data"]
+    if data["bizCode"] != 0:
+        print(data["bizMsg"])
+        return
+    prizeList = data["result"]["prizeList"]
+    t1000 = [i for i in prizeList if i["beanType"] == "BeanPackage"]
+    if t1000:
+        t1000 = t1000[0]
+        if t1000["targetNum"] == t1000["finishNum"]:
+            print("京豆大礼包   今日兑换完成")
+            return
+        if t1000["blueCost"] > totalBlue:
+            print("蓝币不足")
+            return
+        data = getTemplate(cookies, "smtg_obtainPrize",
+                           {"prizeId": t1000["prizeId"]})["data"]
+        if data["bizCode"] != 0:
+            print(data["bizMsg"])
+
+
 cookiesList = jdCookie.get_cookies()
 
 for cookies in cookiesList:
@@ -394,9 +448,11 @@ for cookies in cookiesList:
     upgrade(cookies)
     sign(cookies)
     dailyTask(cookies)
-    manage(cookies)
+    # manage(cookies)
     limitTimePro(cookies)
     pk(cookies)
     lottery(cookies)
+    exchangeBean_1000(cookies)
+    exchangeBean_1(cookies)
     print("##"*25)
     print("\n\n")

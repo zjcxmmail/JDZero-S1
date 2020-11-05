@@ -5,7 +5,7 @@ import time
 
 """
 入口: app首页 "领京东" ——  "摇京豆"
-cron 5,8 2 * * *
+cron 5,8 0 * * *
 """
 
 def template(cookies, functionId, body):

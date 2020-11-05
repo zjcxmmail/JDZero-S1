@@ -1,3 +1,0 @@
-requests
-pyDes
-python-dateutil

@@ -5,6 +5,7 @@ import jdCookie
 
 """
 宠汪汪偷好友积分与狗粮，上限20次
+cron 2 0,6 * * *
 """
 headers = {
     'Host': 'jdjoy.jd.com',

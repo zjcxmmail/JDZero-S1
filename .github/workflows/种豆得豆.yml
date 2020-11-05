@@ -1,8 +1,8 @@
-name: JD_vvipclub.py
+name: JD_plantBean
 
 on:
   schedule:
-    - cron: '5,8 18 * * * '
+    - cron: '0 * * * * '
   watch:
     types: [started]
 jobs:
@@ -20,8 +20,9 @@ jobs:
       - name: 'Install requirements'
         run: pip install -r ./requirements.txt 
         
-      - name: 'run 领京豆- 摇京豆' 
-        run: python3 JD_vvipclub.py 
+      - name: 'run 种豆得豆' 
+        run: python3 jd_plantBean.py 
         env:
             JD_COOKIE: ${{ secrets.JD_COOKIE }}
-            SCKEY: ${{ secrets.SCKEY }}
+     
+    

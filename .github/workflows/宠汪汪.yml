@@ -1,8 +1,8 @@
-name: jd_farm_help
+name: 宠汪汪
 
 on:
   schedule:
-    - cron: '23 0 * * * '
+    - cron: '30 * * * * '
   watch:
     types: [started]
 jobs:
@@ -20,11 +20,11 @@ jobs:
       - name: 'Install requirements'
         run: pip install -r ./requirements.txt 
         
-      - name: 'run jd_farm_help' 
-        run: python3 jd_farm_help.py 
+      - name: 'run 宠汪汪' 
+        run: python3 jd_joy.py 
         env:
             JD_COOKIE: ${{ secrets.JD_COOKIE }}
 
-      
   
      
+    

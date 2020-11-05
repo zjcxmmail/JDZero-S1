@@ -4,7 +4,7 @@ import json
 import jdCookie
 
 # 全民开红包   by @changer2222
-
+# cron 5,8 0 * * *
 
 
 def getTaskIndex(cookies):

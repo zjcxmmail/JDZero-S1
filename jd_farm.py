@@ -3,17 +3,17 @@ import json
 import requests
 import time
 import notification
-import jdShareCodes
-"""
-1、从jdCookie.py处填写 cookie
-2、shareCode 为自己的助力码，但是需要别人为自己助力
-3、欢迎留下shareCode互助
-4、waterTimesLimit 自定义的每天浇水最大次数
-5、retainWaterLimit 完成10次浇水任务的基础上,希望水滴始终高于此数;优先级高于waterTimesLimit
-6、水滴高于100时,默认使用翻倍卡;其他情况不使用道具
 
 """
-waterTimesLimit = 40  # 自定义的每天浇水最大次数
+东东农场
+
+1、shareCode 为自己的助力码，但是需要别人为自己助力
+2、waterTimesLimit 自定义的每天浇水最大次数
+3、retainWaterLimit 完成10次浇水任务的基础上,希望水滴始终高于此数;优先级高于waterTimesLimit
+4、水滴高于100时,默认使用翻倍卡;其他情况不使用道具
+5、cron 35 6,11,17,23 * * *
+"""
+waterTimesLimit = 10  # 自定义的每天浇水最大次数
 retainWaterLimit = 100  # 完成10次浇水任务的基础上,希望水滴始终高于此数
 waterFriendLimit = 2  # [0,2]   0: 始终不替他人浇水   2: 替他人浇水2次以完成任务获得25水
 
@@ -21,9 +21,6 @@ shareCodes = ["c081c648576e4e61a9697c3981705826",
               "f1d0d5ebda7c48c6b3d262d5574315c7",
               "13d13188218a4e3aae0c4db803c81985"]
 
-if jdShareCodes.shareCodes_farm:
-    shareCodes = jdShareCodes.shareCodes_farm
-print("实际执行的助力码: ",shareCodes)
 
 def postTemplate(cookies, functionId, body):
     headers = {
@@ -61,15 +58,18 @@ def getTemplate(cookies, functionId, body):
                             headers=headers, params=params, cookies=cookies)
     return response.json()
 
+
 def duck(cookies):
     print("\n【小鸭子】")
     for _ in range(4):
-        result = postTemplate(cookies, "getFullCollectionReward", {"type": 2,"version":6})
+        result = postTemplate(cookies, "getFullCollectionReward", {
+                              "type": 2, "version": 6})
         print(result)
-        if result["code"]=="10" or result["hasLimit"]:
+        if result["code"] == "10" or result["hasLimit"]:
             print(">>>小鸭子游戏达到上限,跳出")
             return
-          
+
+
 def luck(cookies):
     print("\n【随机水滴】")
     result = postTemplate(cookies, "gotWaterGoalTaskForFarm", {"type": 3})

@@ -3,14 +3,15 @@ import json
 import requests
 import time
 import notification
-import jdShareCodes
+
 
 """
-1、从jdCookie.py处填写 cookie
-2、shareCode 为自己的助力码，但是需要别人为自己助力
-3、欢迎留下shareCode互助
-4、feedTimesLimit 自定义的每天喂养最大次数
-5、retainFoodAmountLimit 完成10次喂养任务的基础上,希望food始终高于此数
+东东萌宠
+
+1、shareCode 为自己的助力码，但是需要别人为自己助力
+2、feedTimesLimit 自定义的每天喂养最大次数
+3、retainFoodAmountLimit 完成10次喂养任务的基础上,希望food始终高于此数
+4、cron 35 6,11,17,23 * * *
 """
 feedTimesLimit = 12
 retainFoodAmountLimit = 40  # 完成10次喂养任务的基础上,希望food始终高于此数;优先级高于feedTimesLimit
@@ -18,9 +19,7 @@ shareCodes = [
     "MTAxODc2NTEzMTAwMDAwMDAwOTYwNDkzMQ==", "MTAxODcxOTI2NTAwMDAwMDAwMTY0NTc4OQ==", "MTAxODc2NTEzMDAwMDAwMDAyNjYzMDQ3MQ=="
 ]  # 自己不能助力自己,填写他人的助力码
 
-if jdShareCodes.shareCodes_pet:
-    shareCodes = jdShareCodes.shareCodes_pet
-print("实际执行的助力码: ",shareCodes)
+
 
 def functionTemplate(cookies, functionId, body):
     headers = {

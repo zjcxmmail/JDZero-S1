@@ -1,4 +1,4 @@
-name: JD_dongdongFarm
+name: 东东农场
 
 on:
   schedule:
@@ -21,7 +21,7 @@ jobs:
         run: pip install -r ./requirements.txt 
         
       - name: 'run 东东农场' 
-        run: python3 JD_dongdongFarm.py 
+        run: python3 jd_farm.py 
         env:
             JD_COOKIE: ${{ secrets.JD_COOKIE }}
             SCKEY: ${{ secrets.SCKEY }}

@@ -2,21 +2,18 @@ import requests
 import time
 import json
 import jdCookie
-import jdShareCodes
+
 
 """
-1、从jdCookie.py处填写 cookie
-2、plantUuid 为自己的助力码，但是需要别人为自己助力
-3、欢迎留下plantUuid互助
+种豆得豆
+
+1、plantUuid 为自己的助力码，但是需要别人为自己助力
+2、cron 35 6-23 * * *
 """
 
 plantUuid = ["7pt22jcko7ljrbpeask7r6avre3h7wlwy7o5jii",
              "r7zdf2yfo4phlpel3nu4q63reu",
              "e7lhibzb3zek2ssdsoyhpgn26va7nkkzj6ygely"]  # 填写别人的助力码
-
-if jdShareCodes.shareCodes_plantBean:
-    plantUuid = jdShareCodes.shareCodes_plantBean
-print("实际执行的助力码: ",plantUuid)
 
 def functionTemplate(cookies, functionId, body):
     headers = {

@@ -2,14 +2,14 @@ import requests
 import json
 import jdCookie
 import re
-from datetime import datetime
-import os
-from dateutil import tz
+from datetime import datetime, timedelta
 import notification
+
 """
-统计当天的京豆
+统计当天获得的京豆,当项目过多时,可能不全
 cron 30 18 * * *
 """
+
 
 def totalBean(cookies):
     headers = {
@@ -25,9 +25,7 @@ def totalBean(cookies):
     params = (
         ('sceneid', '80027'),
         ('sceneval', '2'),
-        # ('g_login_type', '1'),
         ('callback', 'getUserInfoCb'),
-        # ('g_ty', 'ls'),
     )
 
     response = requests.get('https://wq.jd.com/user/info/QueryJDUserInfo',
@@ -82,8 +80,10 @@ def countTodayBean(cookies):
     return income, expense
 
 
-_datatime = datetime.now(tz=tz.gettz('Asia/Shanghai')).strftime("%Y-%m-%d", )
-now = datetime.now(tz=tz.gettz('Asia/Shanghai')).strftime("%Y-%m-%d %H:%M:%S" )
+utc_dt = datetime.utcnow()  # UTC时间
+bj_dt = utc_dt+timedelta(hours=8)  # 北京时间
+_datatime = bj_dt.strftime("%Y-%m-%d", )
+now = bj_dt.strftime("%Y-%m-%d %H:%M:%S")
 message = ""
 for cookies in jdCookie.get_cookies():
     total = totalBean(cookies)

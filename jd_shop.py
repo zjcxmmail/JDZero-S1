@@ -4,7 +4,7 @@ import jdCookie
 
 # 领京豆--进店领豆 
 # 每天运行一次  2或4京豆 聊胜于无
-
+# cron 5,8 0 * * *
 
 def getTaskIndex(cookies):
     headers = {

@@ -8,6 +8,7 @@ import re
 jd取消关注店铺、商品  参考自 @uniqueque (https://github.com/uniqueque/QuantumultX/blob/master/Script/jd_unfollow.js)
 当关注达到上限时，某些活动会提示火爆
 
+
 """
 NUM = 50  # 执行一次，取消关注的数量
 unfollowdShopsFlag = 1  # 取关店铺,停用置为0

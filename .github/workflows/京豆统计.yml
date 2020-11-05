@@ -1,8 +1,10 @@
-name: 京小超
+name: 京豆统计(当日)
 
 on:
   schedule:
-    - cron: '5 * * * *'
+    - cron: '30 10 * * * '
+  watch:
+    types: [started]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,8 +20,9 @@ jobs:
       - name: 'Install requirements'
         run: pip install -r ./requirements.txt 
         
-      - name: 'run 京小超' 
-        run: python3 JD_superMarket.py 
+      - name: 'run count_bean' 
+        run: python3 count_bean.py 
         env:
             JD_COOKIE: ${{ secrets.JD_COOKIE }}
             SCKEY: ${{ secrets.SCKEY }}
+            BARK: ${{ secrets.BARK }}

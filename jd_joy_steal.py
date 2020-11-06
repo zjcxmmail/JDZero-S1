@@ -70,12 +70,15 @@ def steal(cookies, pin):
     print("\n\n")
 
 
-for cookies in jdCookie.get_cookies():
-    print("\n")
-    print(f"""【 {cookies["pt_pin"]} 】""")
-    FriendsPins = getFriendsPins(cookies)
-    for pin in FriendsPins:
-        steal(cookies, pin)
-    print("###"*20)
+def run():
+    for cookies in jdCookie.get_cookies():
+        print("\n")
+        print(f"""【 {cookies["pt_pin"]} 】""")
+        FriendsPins = getFriendsPins(cookies)
+        for pin in FriendsPins:
+            steal(cookies, pin)
+        print("###"*20)
 
+if __name__ == "__main__":
+    run()
 

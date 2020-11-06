@@ -59,9 +59,12 @@ def takeTask(cookies, taskId):
                              headers=headers, params=params, cookies=cookies, data=data)
     print(response.text)
 
+def run():
+    print("进店领豆  每天运行一次  2或4京豆\n")
+    for cookies in jdCookie.get_cookies():
+        print(cookies["pt_pin"])
+        getTaskIndex(cookies)
+        print("\n")
 
-print("进店领豆  每天运行一次  2或4京豆\n")
-for cookies in jdCookie.get_cookies():
-    print(cookies["pt_pin"])
-    getTaskIndex(cookies)
-    print("\n")
+if __name__ == "__main__":
+    run()

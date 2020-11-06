@@ -32,40 +32,41 @@ def shake(cookies):
         "info": "freeTimes"})
     return result["data"]["freeTimes"]
 
-
-for cookies in jdCookie.get_cookies():
-    print(cookies["pt_pin"])
-    browseTask = template(cookies, "vvipclub_lotteryTask", {
-        "info": "browseTask", "withItem": True})["data"][0]
-    time.sleep(1)
-    attentionTask = template(cookies, "vvipclub_lotteryTask", {
-        "info": "attentionTask", "withItem": True})["data"][0]
-    # print(attentionTask)
-    # exit()
-    m = browseTask["totalPrizeTimes"]-browseTask["currentFinishTimes"]
-    print("browseTask: ",m)
-    if m > 0:
-        _ids = [i["id"] for i in browseTask["taskItems"] if not i["finish"]]
-        for i in range(m):
-            print(template(cookies, "vvipclub_doTask", {
-                "taskName": "browseTask", "taskItemId": _ids.pop()}))
-            time.sleep(1)
-
-    n = attentionTask["totalPrizeTimes"]-attentionTask["currentFinishTimes"]
-    time.sleep(1)
-    print("attentionTask: ",n)
-    if n > 0:
-        _ids = [i["id"] for i in attentionTask["taskItems"] if not i["finish"]]
-        for i in range(n):
-            print(template(cookies, "vvipclub_doTask", {
-                "taskName": "attentionTask", "taskItemId": str(_ids.pop())}))
-            time.sleep(2)
-    freeTimes = shake(cookies)
-    print("freeTimes",freeTimes)
-    for i in range(freeTimes):
-        print(template(cookies, "vvipclub_shaking", {
-            "type": "0"}))
+def run():
+    for cookies in jdCookie.get_cookies():
+        print(cookies["pt_pin"])
+        browseTask = template(cookies, "vvipclub_lotteryTask", {
+            "info": "browseTask", "withItem": True})["data"][0]
         time.sleep(1)
-    time.sleep(1)
-    print("\n\n")
-    print("##"*30)
+        attentionTask = template(cookies, "vvipclub_lotteryTask", {
+            "info": "attentionTask", "withItem": True})["data"][0]
+        m = browseTask["totalPrizeTimes"]-browseTask["currentFinishTimes"]
+        print("browseTask: ",m)
+        if m > 0:
+            _ids = [i["id"] for i in browseTask["taskItems"] if not i["finish"]]
+            for i in range(m):
+                print(template(cookies, "vvipclub_doTask", {
+                    "taskName": "browseTask", "taskItemId": _ids.pop()}))
+                time.sleep(1)
+
+        n = attentionTask["totalPrizeTimes"]-attentionTask["currentFinishTimes"]
+        time.sleep(1)
+        print("attentionTask: ",n)
+        if n > 0:
+            _ids = [i["id"] for i in attentionTask["taskItems"] if not i["finish"]]
+            for i in range(n):
+                print(template(cookies, "vvipclub_doTask", {
+                    "taskName": "attentionTask", "taskItemId": str(_ids.pop())}))
+                time.sleep(2)
+        freeTimes = shake(cookies)
+        print("freeTimes",freeTimes)
+        for i in range(freeTimes):
+            print(template(cookies, "vvipclub_shaking", {
+                "type": "0"}))
+            time.sleep(1)
+        time.sleep(1)
+        print("\n\n")
+        print("##"*30)
+
+if __name__ == "__main__":
+    run()

@@ -437,22 +437,24 @@ def exchangeBean_1000(cookies):
         if data["bizCode"] != 0:
             print(data["bizMsg"])
 
+def run():
+    cookiesList = jdCookie.get_cookies()
+    for cookies in cookiesList:
+        print(f"""[ {cookies["pt_pin"]} ]""")
+        receiveCoin(cookies)
+        receiveBlue(cookies)
+        shelfList(cookies)
+        upgrade(cookies)
+        sign(cookies)
+        dailyTask(cookies)
+        # manage(cookies)
+        limitTimePro(cookies)
+        pk(cookies)
+        lottery(cookies)
+        exchangeBean_1000(cookies)
+        exchangeBean_1(cookies)
+        print("##"*25)
+        print("\n\n")
 
-cookiesList = jdCookie.get_cookies()
-
-for cookies in cookiesList:
-    print(f"""[ {cookies["pt_pin"]} ]""")
-    receiveCoin(cookies)
-    receiveBlue(cookies)
-    shelfList(cookies)
-    upgrade(cookies)
-    sign(cookies)
-    dailyTask(cookies)
-    # manage(cookies)
-    limitTimePro(cookies)
-    pk(cookies)
-    lottery(cookies)
-    exchangeBean_1000(cookies)
-    exchangeBean_1(cookies)
-    print("##"*25)
-    print("\n\n")
+if __name__ == "__main__":
+    run()

@@ -181,47 +181,48 @@ def _energyProp_use(cookies, energy_id):
     result = _jsonp2dict(response.text)
     print(result)
 
+def run():
+    # print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    for cookies in cookiesList:
+        task_status, source_id, done_distance, destination = flyTask_state(cookies)
+        if task_status == 0:
+            print(f"开启新任务:{destination}")
+            flyTask_start(cookies, source_id)
+        else:
+            print(f"任务进行中:{destination}")
 
-print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-for cookies in cookiesList:
-    task_status, source_id, done_distance, destination = flyTask_state(cookies)
-    if task_status == 0:
-        print(f"开启新任务:{destination}")
-        flyTask_start(cookies, source_id)
-    else:
-        print(f"任务进行中:{destination}")
+        able_energeProp_list = energeProp_list(cookies)
+        if len(able_energeProp_list) != 0:
+            print("领取燃料ing")
+            for i in able_energeProp_list:
+                _energyProp_gain(cookies,  i)
 
-    able_energeProp_list = energeProp_list(cookies)
-    if len(able_energeProp_list) != 0:
-        print("领取燃料ing")
-        for i in able_energeProp_list:
-            _energyProp_gain(cookies,  i)
+        else:
+            print("     没有可领取的燃料")
 
-    else:
-        print("     没有可领取的燃料")
+        spaceEvents = spaceEvent_list(cookies)  # 检查特殊事件
+        if len(spaceEvents) != 0:
+            print("处理特殊事件ing")
+            for i in spaceEvents:
+                _spaceEvent_handleEvent(cookies, str(i[0]), i[1])
+        else:
+            print("     没有可处理的特殊事件")
 
-    spaceEvents = spaceEvent_list(cookies)  # 检查特殊事件
-    if len(spaceEvents) != 0:
-        print("处理特殊事件ing")
-        for i in spaceEvents:
-            _spaceEvent_handleEvent(cookies, str(i[0]), i[1])
+        usaleList = energeProp_usaleList(cookies)  # 检查暂存的燃料
+        if usaleList:
+            for i in usaleList:
+                _energyProp_use(cookies, i)
+        else:
+            print("     暂无可用燃料")
+        task_status, source_id, done_distance, destination = flyTask_state(cookies)
+        if task_status == 0:
+            print(f"开启新任务:{destination}")
+            flyTask_start(cookies, source_id)
+        else:
+            print(f"任务进行中:{destination}")
+        print("*"*20)
 
-    else:
-        print("     没有可处理的特殊事件")
+        print("\n\n")
 
-    usaleList = energeProp_usaleList(cookies)  # 检查暂存的燃料
-    if usaleList:
-        for i in usaleList:
-            _energyProp_use(cookies, i)
-    else:
-        print("     暂无可用燃料")
-    task_status, source_id, done_distance, destination = flyTask_state(cookies)
-    if task_status == 0:
-        print(f"开启新任务:{destination}")
-        flyTask_start(cookies, source_id)
-    else:
-        print(f"任务进行中:{destination}")
-    print("*"*20)
-
-    print("\n\n")
-
+if __name__ == "__main__":
+    run()

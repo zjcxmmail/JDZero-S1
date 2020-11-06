@@ -104,9 +104,12 @@ def help(cookies):
             print(f"""成功添加好友 [{helpResult["masterUserInfo"]["nickName"]}]""")
         time.sleep(0.5)
 
+def run():
+    for cookies in jdCookie.get_cookies():
+        print("######################################")
+        print(f"""【 {cookies["pt_pin"]} 】""")
+        help(cookies)
+        print("\n\n######################################")
 
-for cookies in jdCookie.get_cookies():
-    print("######################################")
-    print(f"""【 {cookies["pt_pin"]} 】""")
-    help(cookies)
-    print("\n\n######################################")
+if __name__ == "__main__":
+    run()

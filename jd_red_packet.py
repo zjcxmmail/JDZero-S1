@@ -178,10 +178,12 @@ def detailTask(cookies, taskId, detailId):
     requests.post('https://api.m.jd.com/api', headers=headers,
                   params=params, cookies=cookies, data=data)
 
-
-print("天天红包\n")
-for cookies in jdCookie.get_cookies():
-    print(cookies["pt_pin"])
-    print("###"*20)
-    getTaskIndex(cookies)
-    print("\n")
+def run():
+    print("天天红包\n")
+    for cookies in jdCookie.get_cookies():
+        print(cookies["pt_pin"])
+        print("###"*20)
+        getTaskIndex(cookies)
+        print("\n")
+if __name__ == "__main__":
+    run()

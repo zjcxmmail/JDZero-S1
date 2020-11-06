@@ -180,31 +180,34 @@ def takeTask(cookies):
         print("领取投喂10次奖励")
         print(functionTemplate(cookies, "getFeedReachReward", {}))
 
+def run():
+    for cookies in jdCookie.get_cookies():
+        print(f"""[ {cookies["pt_pin"]} ]""")
+        status = functionTemplate(cookies, "initPetTown", {})["result"]
+        if status["userStatus"] == 0:
+            print("活动未开启")
+        if status["petStatus"] == 5 and status["showHongBaoExchangePop"]:
+            notification.notify(
+                f"""##东东萌宠【{cookies["pt_pin"]}】可领取""", f"""## 账号【{cookies["pt_pin"]}】 东东萌宠可以领取""")
+            continue
+        if "goodsInfo" not in status:
+            continue
+        print("\n【检查状态】")
+        print(f"""兑换奖品: {status["goodsInfo"]["goodsName"]}""")
+        print(
+            f"""勋章进度: {status["medalNum"]}/{status["goodsInfo"]["exchangeMedalNum"]}""")
+        print(f"""还需能量: {status["needCollectEnergy"]}""")
+        print(f"""当前进度: {status["medalPercent"]}%""")
+        print(f"""当前饵料: {status["foodAmount"]}""")
+        print("我的助力码: ", status["shareCode"])
+        help(cookies, shareCodes)
+        takeTask(cookies)
+        sport(cookies)
+        masterHelp(cookies)
+        feedPets(cookies)
+        energyCollect(cookies)
+        print("\n为防止遗漏，再运行一次")
+        print("##"*30)
 
-for cookies in jdCookie.get_cookies():
-    print(f"""[ {cookies["pt_pin"]} ]""")
-    status = functionTemplate(cookies, "initPetTown", {})["result"]
-    if status["userStatus"] == 0:
-        print("活动未开启")
-    if status["petStatus"] == 5 and status["showHongBaoExchangePop"]:
-        notification.notify(
-            f"""##东东萌宠【{cookies["pt_pin"]}】可领取""", f"""## 账号【{cookies["pt_pin"]}】 东东萌宠可以领取""")
-        continue
-    if "goodsInfo" not in status:
-        continue
-    print("\n【检查状态】")
-    print(f"""兑换奖品: {status["goodsInfo"]["goodsName"]}""")
-    print(
-        f"""勋章进度: {status["medalNum"]}/{status["goodsInfo"]["exchangeMedalNum"]}""")
-    print(f"""还需能量: {status["needCollectEnergy"]}""")
-    print(f"""当前进度: {status["medalPercent"]}%""")
-    print(f"""当前饵料: {status["foodAmount"]}""")
-    print("我的助力码: ", status["shareCode"])
-    help(cookies, shareCodes)
-    takeTask(cookies)
-    sport(cookies)
-    masterHelp(cookies)
-    feedPets(cookies)
-    energyCollect(cookies)
-    print("\n为防止遗漏，再运行一次")
-    print("##"*30)
+if __name__ == "__main__":
+    run()

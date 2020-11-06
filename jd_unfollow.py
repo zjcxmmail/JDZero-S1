@@ -90,13 +90,15 @@ def jsonp2json(jsonp):
     _dict = re.findall(r"try{jsonp\(([\s\S]*)\);}catch\(e\){}", jsonp)[0]
     return json.loads(_dict)
 
-
-print("尽量不要一次性全部取消，以免被风控")
-for cookies in jdCookie.get_cookies():
-    print("\n")
-    print(f"""[ {cookies["pt_pin"]} ]""")
-    if unfollowdShopsFlag == 1:
-        unfollowdShops(cookies)
-    if unfollowdGoodsFlag == 1:
-        unfollowdGoods(cookies)
-    print("##"*25)
+def run():
+    print("尽量不要一次性全部取消，以免被风控")
+    for cookies in jdCookie.get_cookies():
+        print("\n")
+        print(f"""[ {cookies["pt_pin"]} ]""")
+        if unfollowdShopsFlag == 1:
+            unfollowdShops(cookies)
+        if unfollowdGoodsFlag == 1:
+            unfollowdGoods(cookies)
+        print("##"*25)
+if __name__ == "__main__":
+    run()

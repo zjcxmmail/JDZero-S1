@@ -281,17 +281,20 @@ def combat(cookies):
         print(data.text)
         time.sleep(5)  # 5秒延迟，多账号可能匹配到自己
 
-for cookies in jdCookie.get_cookies():
-    feed(cookies, FEED_NUM)
-    
+def run():
+    for cookies in jdCookie.get_cookies():
+        feed(cookies, FEED_NUM)
+        
 
-for cookies in jdCookie.get_cookies():
-    print("\n")
-    print(f"""[ {cookies["pt_pin"]} ]""")
-    takeTask(cookies)
-    reward(cookies)
-    ScanMarket_extra(cookies)
-    enterRoom(cookies)
-    desk(cookies)
-    combat(cookies)
-    print("##"*25)
+    for cookies in jdCookie.get_cookies():
+        print("\n")
+        print(f"""[ {cookies["pt_pin"]} ]""")
+        takeTask(cookies)
+        reward(cookies)
+        ScanMarket_extra(cookies)
+        enterRoom(cookies)
+        desk(cookies)
+        combat(cookies)
+        print("##"*25)
+if __name__ == "__main__":
+    run()

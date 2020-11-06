@@ -329,38 +329,41 @@ def turnTable(cookies):
             cookies, "lotteryForTurntableFarm", {"type": 1}))  # 抽奖
         time.sleep(2)
 
+def run():
+    for cookies in jdCookie.get_cookies():
+        result = postTemplate(cookies, 'initForFarm', {"version": 4})
+        treeState = result["treeState"]
+        if treeState == 0:
+            print("还未开始种植")
+            continue
+        if treeState in [2, 3]:
+            print("可以兑换了")
+            notification.notify(
+                f"""东东农场可兑换【{cookies["pt_pin"]}】""", f"""东东农场 账号【{cookies["pt_pin"]}】 可以兑换了""")
+            continue
+        nickName = result["farmUserPro"]["nickName"]
+        myshareCode = result["farmUserPro"]["shareCode"]
+        treeEnergy = result["farmUserPro"]["treeEnergy"]
+        lastTimes = int((result["farmUserPro"]["treeTotalEnergy"]-treeEnergy)/10)
+        print(f"""\n\n[ {nickName} ]\n{result["farmUserPro"]["name"]}""")
+        print(f'已经薅了{result["farmUserPro"]["winTimes"]}次')
+        print(f"""我的助力码: {myshareCode}""")
+        print(
+            f"""treeEnergy: {treeEnergy}/{result["farmUserPro"]["treeTotalEnergy"]}""")
+        print(f"""预计浇水次数: {lastTimes}""")
+        turnTable(cookies)
+        clockIn(cookies)
+        _help(cookies, shareCodes)
+        totalWaterTaskTimes = takeTask(cookies)
+        masterHelp(cookies)
+        luck(cookies)
+        duck(cookies)
+        friends(cookies)
+        bag(cookies)
+        water(cookies, totalWaterTaskTimes,
+            result["toFlowTimes"], result["toFruitTimes"])
+        print("\n")
+        print("##"*30)
 
-for cookies in jdCookie.get_cookies():
-    result = postTemplate(cookies, 'initForFarm', {"version": 4})
-    treeState = result["treeState"]
-    if treeState == 0:
-        print("还未开始种植")
-        continue
-    if treeState in [2, 3]:
-        print("可以兑换了")
-        notification.notify(
-            f"""东东农场可兑换【{cookies["pt_pin"]}】""", f"""东东农场 账号【{cookies["pt_pin"]}】 可以兑换了""")
-        continue
-    nickName = result["farmUserPro"]["nickName"]
-    myshareCode = result["farmUserPro"]["shareCode"]
-    treeEnergy = result["farmUserPro"]["treeEnergy"]
-    lastTimes = int((result["farmUserPro"]["treeTotalEnergy"]-treeEnergy)/10)
-    print(f"""\n\n[ {nickName} ]\n{result["farmUserPro"]["name"]}""")
-    print(f'已经薅了{result["farmUserPro"]["winTimes"]}次')
-    print(f"""我的助力码: {myshareCode}""")
-    print(
-        f"""treeEnergy: {treeEnergy}/{result["farmUserPro"]["treeTotalEnergy"]}""")
-    print(f"""预计浇水次数: {lastTimes}""")
-    turnTable(cookies)
-    clockIn(cookies)
-    _help(cookies, shareCodes)
-    totalWaterTaskTimes = takeTask(cookies)
-    masterHelp(cookies)
-    luck(cookies)
-    duck(cookies)
-    friends(cookies)
-    bag(cookies)
-    water(cookies, totalWaterTaskTimes,
-          result["toFlowTimes"], result["toFruitTimes"])
-    print("\n")
-    print("##"*30)
+if __name__ == "__main__":
+    run()

@@ -171,10 +171,14 @@ def sign(cookies):
         return
     hadSigned = data["result"]["hadSigned"]
     if hadSigned == 1:
-        print("sign ok")
-        return
+        print("每日签到 ok")
     if hadSigned == 2:
-        print(getTemplate(cookies, "smtg_sign", {}))
+        print("每日签到 ", getTemplate(cookies, "smtg_sign", {}))
+    hadReceivedAddedReward = data["result"]["hadReceivedAddedReward"]
+    if hadReceivedAddedReward == 1:
+        print("额外签到 ok")
+    if hadReceivedAddedReward == 0:
+        print("额外签到 ", getTemplate(cookies, "smtg_sign", {"channel": "1"}))
 
 
 def productList(cookies):
@@ -350,8 +354,7 @@ def pk(cookies):
 
     if data["pkStatus"] == 3:
         print("pk暂停")
-        return
-    return
+        
     """
     if data["joinStatus"] == 0 and flag_pk == 1:
         tmp = requests.get(

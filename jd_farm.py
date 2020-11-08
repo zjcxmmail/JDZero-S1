@@ -172,7 +172,7 @@ def friends(cookies):
         if N == 0:
             return
         data = postTemplate(cookies, "waterFriendForFarm",
-                            {"shareCode": i, "version": 4, "channel": 1})
+                            {"shareCode": i, "version": 6})
         print(data)
         if data["code"] == "0":
             N -= 1
@@ -184,14 +184,15 @@ def friends(cookies):
 def bag(cookies):
     print("\n【背包】")
     data = postTemplate(cookies, "myCardInfoForFarm",
-                        {"version": 4, "channel": 1})
+                        {"version": 6, "channel": 1})
     beanCard = data['beanCard']
     fastCard = data["fastCard"]
     doubleCard = data["doubleCard"]
+    signCard = data["signCard"]
     print(f"""水滴换豆卡 {beanCard}""")
     print(f"""快速浇水卡 {fastCard}""")
     print(f"""水滴翻倍卡 {doubleCard}""")
-    # postTemplate(cookies, "userMyCardForFarm", {"cardType":"fastCard"})   使用道具卡
+    print(f"""额外签到卡 {signCard}""")
 
 
 def takeTask(cookies):
@@ -356,7 +357,8 @@ def run():
         treeEnergy = result["farmUserPro"]["treeEnergy"]
         lastTimes = int(
             (result["farmUserPro"]["treeTotalEnergy"]-treeEnergy)/10)
-        print(f"""\n\n[ {nickName} ]\n{result["farmUserPro"]["name"]}""")
+        print(
+            f"""\n\n[ {nickName} ]\n{result["farmUserPro"]["name"]} (通用红包)""")
         print(f'已经薅了{result["farmUserPro"]["winTimes"]}次')
         print(f"""我的助力码: {myshareCode}""")
         print(

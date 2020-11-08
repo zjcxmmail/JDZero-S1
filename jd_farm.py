@@ -13,7 +13,7 @@ import notification
 4、水滴高于100时,默认使用翻倍卡;其他情况不使用道具
 5、cron 35 6,11,17,23 * * *
 """
-waterTimesLimit = 10  # 自定义的每天浇水最大次数
+waterTimesLimit = 20  # 自定义的每天浇水最大次数
 retainWaterLimit = 100  # 完成10次浇水任务的基础上,希望水滴始终高于此数
 waterFriendLimit = 2  # [0,2]   0: 始终不替他人浇水   2: 替他人浇水2次以完成任务获得25水
 
@@ -64,7 +64,7 @@ def duck(cookies):
     for _ in range(4):
         result = postTemplate(cookies, "getFullCollectionReward", {
                               "type": 2, "version": 6})
-        print(result)
+        # print(result)
         if result["code"] == "10" or result["hasLimit"]:
             print(">>>小鸭子游戏达到上限,跳出")
             return
@@ -79,10 +79,14 @@ def luck(cookies):
         print("暂无")
 
 
-def water(cookies, totalWaterTaskTimes, toFlowTimes, toFruitTimes):
+def water(cookies):
     print("\n【Water】")
-    totalEnergy = postTemplate(cookies, "initForFarm", {"version": 2})[
-        "farmUserPro"]["totalEnergy"]
+    result = postTemplate(cookies, "initForFarm", {"version": 2})
+    totalWaterTaskTimes = postTemplate(cookies, "taskInitForFarm", {"version": 2})[
+        "totalWaterTaskInit"]["totalWaterTaskTimes"]
+    toFlowTimes = result["toFlowTimes"]
+    toFruitTimes = result["toFruitTimes"]
+    totalEnergy = result["farmUserPro"]["totalEnergy"]
     print(f"当前水滴: {totalEnergy}")
     doubleCard = postTemplate(cookies, "myCardInfoForFarm",
                               {"version": 4, "channel": 1})["doubleCard"]
@@ -93,24 +97,22 @@ def water(cookies, totalWaterTaskTimes, toFlowTimes, toFruitTimes):
             print("使用[翻倍卡]", postTemplate(cookies, "userMyCardForFarm",
                                           {"cardType": "doubleCard"}))
 
-    if postTemplate(cookies, "taskInitForFarm", {})["totalWaterTaskInit"]["totalWaterTaskTimes"] >= 10 and totalEnergy < retainWaterLimit+10:
+    if totalWaterTaskTimes >= 10 and totalEnergy < retainWaterLimit+10:
         print(
             f"""10次浇水完成,保留水滴{totalEnergy}g (retainWaterLimit={retainWaterLimit} 限制)""")
         print("跳出自动浇水")
         return
     if totalWaterTaskTimes >= waterTimesLimit:
         print("跳过浇水")
-        print("已达今日最大浇水次数 ", waterTimesLimit)
+        print(f"今日实际浇水 {totalWaterTaskTimes} 次")
+        print(f"已达今日最大浇水 {waterTimesLimit} 次")
         print("\n请自行修改 waterTimesLimit")
         return
-    n = waterTimesLimit-totalWaterTaskTimes
-    for i in range(int(totalEnergy/10)):
-        if n == 0:
-            print("浇水次数限制,结束浇水")
-            return
+    for i in range(waterTimesLimit):
         print(f"自动浇水...[{i}]")
         time.sleep(0.2)
         waterInfo = postTemplate(cookies, "waterGoodForFarm", {})  # 实际浇水
+        print(waterInfo)
         totalEnergy = waterInfo["totalEnergy"]
         totalWaterTimes = waterInfo["totalWaterTimes"]
         if waterInfo["finished"]:
@@ -133,7 +135,12 @@ def water(cookies, totalWaterTaskTimes, toFlowTimes, toFruitTimes):
                 f"""10次浇水完成,保留水滴{totalEnergy}g (retainWaterLimit= {retainWaterLimit}限制)""")
             print("跳出自动浇水")
             return
-        n -= 1
+        if totalWaterTimes >= waterTimesLimit:
+            print("跳过浇水")
+            print(f"今日实际浇水 {totalWaterTimes} 次")
+            print(f"已达今日最大浇水 {waterTimesLimit} 次")
+            print("\n请自行修改 waterTimesLimit")
+            return
     print("水滴不足,跳出浇水")
 
 
@@ -350,18 +357,18 @@ def run():
         print(f"""我的助力码: {myshareCode}""")
         print(
             f"""treeEnergy: {treeEnergy}/{result["farmUserPro"]["treeTotalEnergy"]}""")
-        print(f"""预计浇水次数: {lastTimes}""")
+        print(
+            f"""剩余浇水次数: {lastTimes}""")
         turnTable(cookies)
         clockIn(cookies)
         _help(cookies, shareCodes)
-        totalWaterTaskTimes = takeTask(cookies)
+        takeTask(cookies)
         masterHelp(cookies)
         luck(cookies)
         duck(cookies)
         friends(cookies)
         bag(cookies)
-        water(cookies, totalWaterTaskTimes,
-            result["toFlowTimes"], result["toFruitTimes"])
+        water(cookies)
         print("\n")
         print("##"*30)
 

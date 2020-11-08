@@ -141,7 +141,9 @@ def water(cookies):
             print(f"已达今日最大浇水 {waterTimesLimit} 次")
             print("\n请自行修改 waterTimesLimit")
             return
-    print("水滴不足,跳出浇水")
+        if totalEnergy < 10:
+            print("水滴不足")
+            return
 
 
 def friends(cookies):
@@ -336,6 +338,7 @@ def turnTable(cookies):
             cookies, "lotteryForTurntableFarm", {"type": 1}))  # 抽奖
         time.sleep(2)
 
+
 def run():
     for cookies in jdCookie.get_cookies():
         result = postTemplate(cookies, 'initForFarm', {"version": 4})
@@ -351,7 +354,8 @@ def run():
         nickName = result["farmUserPro"]["nickName"]
         myshareCode = result["farmUserPro"]["shareCode"]
         treeEnergy = result["farmUserPro"]["treeEnergy"]
-        lastTimes = int((result["farmUserPro"]["treeTotalEnergy"]-treeEnergy)/10)
+        lastTimes = int(
+            (result["farmUserPro"]["treeTotalEnergy"]-treeEnergy)/10)
         print(f"""\n\n[ {nickName} ]\n{result["farmUserPro"]["name"]}""")
         print(f'已经薅了{result["farmUserPro"]["winTimes"]}次')
         print(f"""我的助力码: {myshareCode}""")
@@ -371,6 +375,7 @@ def run():
         water(cookies)
         print("\n")
         print("##"*30)
+
 
 if __name__ == "__main__":
     run()

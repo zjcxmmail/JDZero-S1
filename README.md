@@ -2,7 +2,7 @@
 
 > 基于python的自动化脚本  
 > 长期活动，自用为主  
-> 低调使用，请勿到处宣传  
+> 低调使用，请勿到处宣传    
 
 
 
@@ -41,8 +41,6 @@
 
 无需特别配置，每天仅需运行一次的脚本
 
-已集成GitHub action [合集](.github\workflows\工具合集.yml)
-
 | 名称             | 功能       | 备注 |
 | ---------------- | ---------- | ---- |
 | jd_vvipclub.py   | 摇京豆     |      |
@@ -60,11 +58,10 @@
 下载到本地，填写 `jdCookie.py` 中的 `cookies` 信息  
 云函数可以参考 [index.py](index.py) 以及对应官方文档
 
-##### 2、方案二(推荐)
+##### 2、方案二
 
 GitHub action自动运行，账号信息读取自 `Repo-Setting-Secrets`  
-但是 action 定时运行会有延迟  
-参考 [action.md](action.md)
+请勿滥用
 
 
 

@@ -57,7 +57,7 @@ def jingDetailList(cookies, page):
     return beanList
 
 
-def countTodayBean(cookies):
+def countTodayBean(cookies,_datatime):
     income = 0
     expense = 0
     page_1 = jingDetailList(cookies, 1)
@@ -87,7 +87,7 @@ def run():
     message = ""
     for cookies in jdCookie.get_cookies():
         total = totalBean(cookies)
-        income, expense = countTodayBean(cookies)
+        income, expense = countTodayBean(cookies,_datatime)
         message += f'\n\n【{cookies["pt_pin"]}】 \n当前京豆: {total} \n今日收入: +{income} \n今日支出: {expense}'
 
         print("\n")

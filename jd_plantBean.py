@@ -171,7 +171,7 @@ def steal(cookies, roundId):
             time.sleep(2)
 
 
-def getReward(cookies, status):
+def getReward(cookies, status,lastRoundId):
     print("\n[收获状况]")
     if status == "5":
         data = functionTemplate(
@@ -181,7 +181,7 @@ def getReward(cookies, status):
         print("您已领奖，去京豆明细页看看")
 
 
-def water(cookies):
+def water(cookies,currentRoundId):
     print("\n[浇水ing]")
     result = functionTemplate(cookies, "cultureBean", {
         "roundId": currentRoundId, "monitor_refer": "plant_index"})
@@ -201,7 +201,7 @@ def egg(cookies):
         functionTemplate(cookies, "plantEggDoLottery", {})
 
 
-def waterWheel(cookies):
+def waterWheel(cookies,currentRoundId):
     print("\n[水车生产(6-21)]")
     result = functionTemplate(cookies, "receiveNutrients", {
         "roundId": currentRoundId, "monitor_refer": "plant_receiveNutrients"})
@@ -229,10 +229,10 @@ def run():
                 f"""[{i["taskName"]}]  {i["gainedNum"]}/{i["totalNum"]}   {i["isFinished"]} """)
 
         egg(cookies)
-        waterWheel(cookies)
+        waterWheel(cookies,currentRoundId)
         steal(cookies, currentRoundId)
-        water(cookies)
-        getReward(cookies, roundList[0]["awardState"])
+        water(cookies,currentRoundId)
+        getReward(cookies, roundList[0]["awardState"],lastRoundId)
         print("\nEND\n")
         print("##"*30)
 if __name__ == "__main__":

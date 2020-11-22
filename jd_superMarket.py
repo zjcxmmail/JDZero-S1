@@ -335,10 +335,13 @@ def pk(cookies):
     print("\n【PK有礼】")  # TODO
     data = getTemplate(cookies, "smtg_getTeamPkDetailInfo", {})[
         "data"]["result"]
+    # print(data)
     print(f'joinStatus:{data["joinStatus"]}')
     print(f'pkStatus:{data["pkStatus"]}')
 
     if data["joinStatus"] == 1:
+        if "teamId" not in data:
+            return
 
         print(f'已经加入队伍【{data["teamId"]}】')
         print(">>>pk对比\n对方/我方")

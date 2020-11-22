@@ -193,6 +193,9 @@ def bag(cookies):
     print(f"""快速浇水卡 {fastCard}""")
     print(f"""水滴翻倍卡 {doubleCard}""")
     print(f"""额外签到卡 {signCard}""")
+    if signCard > 0:
+        print("使用【额外签到卡】 ", postTemplate(
+            cookies, "userMyCardForFarm", {"cardType": "signCard","version": 6}))
 
 
 def takeTask(cookies):

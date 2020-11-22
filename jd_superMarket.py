@@ -455,7 +455,7 @@ def run():
         dailyTask(cookies)
         # manage(cookies)
         limitTimePro(cookies)
-        pk(cookies)
+        # pk(cookies)
         lottery(cookies)
         exchangeBean_1000(cookies)
         exchangeBean_1(cookies)

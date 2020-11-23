@@ -7,6 +7,7 @@ import notification
 
 """
 统计当天获得的京豆,当项目过多时,可能不全
+统计当前红包和即将过期红包
 cron 30 18 * * *
 """
 
@@ -79,6 +80,41 @@ def countTodayBean(cookies,_datatime):
         expense += sum(expense_tmp)
     return income, expense
 
+def red(cookies):
+    headers = {
+        'Host': 'wq.jd.com',
+        'Accept': '*/*',
+        'Connection': 'keep-alive',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1',
+        'Accept-Language': 'zh-cn',
+        'Referer': 'https://wqs.jd.com/my/redpacket.shtml',
+        'Accept-Encoding': 'gzip, deflate, br',
+    }
+
+    params = (
+        ('channel', '3'),
+        ('type', '1'),
+        ('page', '0'),
+        ('pageSize', '100'),
+        ('orgFlag', 'JD_PinGou_New'),
+        ('expiredRedFlag', '1'),
+        ('sceneval', '2'),
+        ('g_login_type', '1'),
+        ('g_ty', 'ls'),
+    )
+
+    response = requests.get('https://wq.jd.com/user/info/QueryUserRedEnvelopes',
+                            headers=headers, params=params, cookies=cookies)
+    try:
+        result = response.json()
+        data = result["data"]
+    except:
+        print("❌红包数据返回错误")
+        return None, None
+    balance = data["balance"]
+    expiredBalance = data["expiredBalance"]
+    return balance, expiredBalance
+
 def run():
     utc_dt = datetime.utcnow()  # UTC时间
     bj_dt = utc_dt+timedelta(hours=8)  # 北京时间
@@ -87,11 +123,12 @@ def run():
     message = ""
     for cookies in jdCookie.get_cookies():
         total = totalBean(cookies)
+        balance, expiredBalance = red(cookies)
         income, expense = countTodayBean(cookies,_datatime)
-        message += f'\n\n【{cookies["pt_pin"]}】 \n当前京豆: {total} \n今日收入: +{income} \n今日支出: {expense}'
-
+        message += f'\n\n【{cookies["pt_pin"]}】 \n当前京豆: {total} \n今日收入: {income} \n今日支出: {expense}\n红包合计: {balance}元 \n即将过期: {expiredBalance}元'
         print("\n")
     print(f"⏰ 京豆统计 {now}")
+    message+="\n\n\n[注] 即将过期指 过了零点就会失效"
     print(message)
     notification.notify(f"⏰ 京豆统计 {now}", message)
 

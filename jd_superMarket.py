@@ -31,7 +31,7 @@ import random
 # 参数设置,开启置1,关闭置0
 flag_upgrade = 1              # 额外,自动升级   顺序:解锁升级商品(高等)、升级货架
 flag_limitTimeProduct = 1     # 自动上架限时商品(替换普通商品,同类型至少两个商品)
-# flag_pk = 1                   # 自动加入zero的队伍
+flag_pk = 1                   # 自动加入zero的队伍
 flag_prize_1000 = 1  # 京豆打包兑换
 flag_prize_1 = 1  # 单个京豆兑换,万能的京豆
 
@@ -335,7 +335,10 @@ def pk(cookies):
     print("\n【PK有礼】")  # TODO
     data = getTemplate(cookies, "smtg_getTeamPkDetailInfo", {})[
         "data"]["result"]
-    # print(data)
+    if "result" not in data["data"]:
+        print(data["data"])
+        return
+    data = data["data"]["result"]
     print(f'joinStatus:{data["joinStatus"]}')
     print(f'pkStatus:{data["pkStatus"]}')
 
@@ -358,10 +361,15 @@ def pk(cookies):
     if data["pkStatus"] == 3:
         print("pk暂停")
         
-    """
+    
     if data["joinStatus"] == 0 and flag_pk == 1:
-        tmp = requests.get(
-            "https://raw.githubusercontent.com/Zero-S1/tmp/main/jd_smPkInfo.json").json()
+        try:
+            resopnse = requests.get(
+            "https://raw.githubusercontent.com/Zero-S1/tmp/main/jd_smPkInfo.json", timeout=2)
+            print(resopnse.text)
+        except:
+            print("无法连接github 跳过")
+        tmp=resopnse.json()
         if tmp["pkActivityId"] != data["pkActivityId"]:
             print("还未更新,等待下次运行")
             return
@@ -370,7 +378,7 @@ def pk(cookies):
         result1 = getTemplate(cookies, "smtg_joinPkTeam", {"teamId": tmp["teamId"],
                                                            "inviteCode": random.choice(tmp["inviteCode"]), "sharePkActivityId": data["pkActivityId"], "channel": "3"})
         print(result1)
-    """
+    
 
 
 def manage(cookies):
@@ -455,7 +463,7 @@ def run():
         dailyTask(cookies)
         # manage(cookies)
         limitTimePro(cookies)
-        # pk(cookies)
+        pk(cookies)
         lottery(cookies)
         exchangeBean_1000(cookies)
         exchangeBean_1(cookies)

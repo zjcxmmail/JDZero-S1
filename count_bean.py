@@ -58,7 +58,7 @@ def jingDetailList(cookies, page):
     return beanList
 
 
-def countTodayBean(cookies,_datatime):
+def countTodayBean(cookies, _datatime):
     income = 0
     expense = 0
     page_1 = jingDetailList(cookies, 1)
@@ -79,6 +79,7 @@ def countTodayBean(cookies,_datatime):
         income += sum(income_tmp)
         expense += sum(expense_tmp)
     return income, expense
+
 
 def red(cookies):
     headers = {
@@ -112,8 +113,9 @@ def red(cookies):
         print("❌红包数据返回错误")
         return None, None
     balance = data["balance"]
-    expiredBalance = data["expiredBalance"]
+    expiredBalance = data["expiredBalance"] or 0
     return balance, expiredBalance
+
 
 def run():
     utc_dt = datetime.utcnow()  # UTC时间
@@ -124,13 +126,14 @@ def run():
     for cookies in jdCookie.get_cookies():
         total = totalBean(cookies)
         balance, expiredBalance = red(cookies)
-        income, expense = countTodayBean(cookies,_datatime)
+        income, expense = countTodayBean(cookies, _datatime)
         message += f'\n\n【{cookies["pt_pin"]}】 \n当前京豆: {total} \n今日收入: {income} \n今日支出: {expense}\n红包合计: {balance}元 \n即将过期: {expiredBalance}元'
         print("\n")
     print(f"⏰ 京豆统计 {now}")
-    message+="\n\n\n[注] 即将过期指 过了零点就会失效"
+    message += "\n\n\n[注] 即将过期指 过了零点就会失效"
     print(message)
     notification.notify(f"⏰ 京豆统计 {now}", message)
+
 
 if __name__ == "__main__":
     run()

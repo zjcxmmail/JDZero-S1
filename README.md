@@ -89,3 +89,12 @@ GitHub action自动运行，账号信息读取自 `Repo-Setting-Secrets`
 
 有能力且需要的同学可以参考[讨论](https://github.com/Zero-S1/JD_tools/pull/42)
 > 个人不推荐， 因为你不确定上游改动了什么
+
+
+
+### 赞赏码 (开发不易,请作者喝杯奶茶)
+
+
+
+<p align="center">
+  <img src="thanks.jpg" alt="抓包" width='80%' height='70%'/>

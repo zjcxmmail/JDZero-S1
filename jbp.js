@@ -38,7 +38,7 @@ for (var i in lastHourWinInfos) {
 body["data"]["lastHourWinInfos"].push({
     'pin': "",
     'nickName': '',
-    'investHour':   lastHourWinInfos[0]['investHour'],
+    'investHour': lastHourWinInfos[0]['investHour'],
     'stage': '2',
     'food': 0,
     'rank': 7,

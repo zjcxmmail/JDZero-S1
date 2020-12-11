@@ -361,6 +361,7 @@ def pk(cookies):
             print(resopnse.text)
         except:
             print("无法连接github 跳过")
+            return
         tmp=resopnse.json()
         if tmp["pkActivityId"] != data["pkActivityId"]:
             print("还未更新,等待下次运行")

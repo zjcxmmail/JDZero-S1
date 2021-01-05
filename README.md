@@ -63,6 +63,7 @@
 GitHub action自动运行，账号信息读取自 `Setting -> Secrets`  
 
 **Secrets 填写格式**  
+新建secret名称为`JD_COOKIE`  
 单账号为
 `pt_key=aaaaaa&pt_pin=bbbbbbb`  ;
 

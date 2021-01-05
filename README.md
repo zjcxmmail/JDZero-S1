@@ -60,9 +60,18 @@
 
 ##### 2、方案二
 
-GitHub action自动运行，账号信息读取自 `Repo-Setting-Secrets`  
-请勿滥用
+GitHub action自动运行，账号信息读取自 `Setting -> Secrets`  
 
+**Secrets 填写格式**  
+单账号为
+`pt_key=aaaaaa&pt_pin=bbbbbbb`  ;
+
+
+如果需要多账号
+```
+pt_key=aaaaaa&pt_pin=bbbbbbb
+pt_key=cccccc&pt_pin=ddddddd
+```
 
 
 ### 通知服务

@@ -61,8 +61,15 @@ def enterRoom(cookies):
     """
     进入房间；喂养后刷新
     """
-    data = getTemplate(cookies, "enterRoom", ())["data"]
-    # print(data)
+    params = (
+        ('reqSource', 'h5'),
+        ('invitePin', ''),
+    )
+
+    data1 = '{}'
+    response = requests.post('https://jdjoy.jd.com/pet/enterRoom/h5',
+                             headers=headers, params=params, cookies=cookies, data=data1)
+    data = response.json()["data"]
     petFood = data["petFood"]
     feedCount = data["feedCount"]
     petLevel = data["petLevel"]
